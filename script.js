@@ -151,7 +151,7 @@ function initAudioContext() {
 }
 
 // PHẦN CẬP NHẬT TĂNG ÂM LƯỢNG TIẾNG BEEP CHUYỂN PHA
-function playPhaseSound(frequency, duration, type = 'sine') {
+function playPhaseSound(frequency, d, type = 'sine') {
     if (!audioCtx) return;
     try {
         let osc = audioCtx.createOscillator();
@@ -162,13 +162,13 @@ function playPhaseSound(frequency, duration, type = 'sine') {
         
         // Đã tăng từ 0.12 lên 0.5 giúp âm thanh hiệu lệnh nghe rõ ràng, sắc nét hơn
         gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
         
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
         
         osc.start();
-        osc.stop(audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + d);
     } catch (e) {
         console.log("Audio cue muted.");
     }
@@ -176,7 +176,7 @@ function playPhaseSound(frequency, duration, type = 'sine') {
 
 // Thêm biến global để theo dõi thời gian đã trôi qua
 let elapsedTime = 0; 
-const BREATHING_DURATION = 30; // 2 phút (120 giây)
+const BREATHING_DURATION = 120; // 2 phút (120 giây)
 
 function togglePractice() {
     initAudioContext();

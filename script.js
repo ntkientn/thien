@@ -176,7 +176,7 @@ function playPhaseSound(frequency, duration, type = 'sine') {
 
 // Thêm biến global để theo dõi thời gian đã trôi qua
 let elapsedTime = 0; 
-const BREATHING_DURATION = 120; // 2 phút (120 giây)
+const BREATHING_DURATION = 30; // 2 phút (120 giây)
 
 function togglePractice() {
     initAudioContext();
@@ -186,7 +186,6 @@ function togglePractice() {
     const audioSelect = document.getElementById("bg-music"); 
     const bgPlayer = document.getElementById("audio-bg-player");
     
-    // Lấy các DOM elements cần thao tác hiển thị/ẩn
     const phaseBadge = document.getElementById("phase-indicator");
     const pacingBars = document.getElementById("pacing-bars-container");
     const audioHint = document.getElementById("audio-hint");
@@ -196,23 +195,22 @@ function togglePractice() {
         clearInterval(breatheInterval);
         clearInterval(totalTimerInterval);
         isPracticing = false;
-        // THÊM 3 DÒNG NÀY ĐỂ NGẮT GIỌNG ĐỌC KHI DỪNG:
+        
+        // Tắt voice nếu đang đọc dở
         voiceStart.pause(); voiceStart.currentTime = 0;
         voiceTransition.pause(); voiceTransition.currentTime = 0;
         voiceEnd.pause(); voiceEnd.currentTime = 0;
-
+        
         startBtn.innerText = "🧘 Bắt Đầu Thiền";
         startBtn.classList.remove("active-stop");
         
         resetBreathingVisuals();
         
-        // Khôi phục giao diện
         phaseBadge.classList.add("hidden");
         pacingBars.classList.remove("fade-out");
         audioHint.classList.remove("fade-out");
         document.getElementById("circle-text-label").innerText = "Hơi thở";
         
-        // Mở khóa cấu hình
         if(paceSelect) paceSelect.disabled = false;
         if(durationSelect) durationSelect.disabled = false;
 
@@ -223,18 +221,14 @@ function togglePractice() {
     } else {
         // --- START MECHANISM ---
         isPracticing = true;
-        elapsedTime = 0; // Reset thời gian trôi qua
-        // THÊM DÒNG NÀY ĐỂ PHÁT GIỌNG LÚC BẮT ĐẦU:
-        voiceStart.play().catch(e => console.log("Trình duyệt chặn autoplay audio", e));        
-
+        elapsedTime = 0; 
+        
         startBtn.innerText = "🛑 Dừng lại";
         startBtn.classList.add("active-stop");
         
-        // Hiển thị Nhãn Giai đoạn 1
         phaseBadge.classList.remove("hidden");
         phaseBadge.innerText = "Giai đoạn 1: Luyện Thở (2 Phút)";
 
-        // Khóa cấu hình
         if(paceSelect) paceSelect.disabled = true;
         if(durationSelect) durationSelect.disabled = true;
 
@@ -244,7 +238,6 @@ function togglePractice() {
         totalTimeRemaining = parseInt(durationSelect.value);
         updateTimerDisplay(totalTimeRemaining);
 
-        // Kích hoạt phát nhạc nền
         if (bgPlayer && audioSelect && audioSelect.value !== "nature") {
             bgPlayer.src = audioSelect.value;
             bgPlayer.volume = 0.8;
@@ -252,42 +245,70 @@ function togglePractice() {
             bgPlayer.play().catch(err => console.log("Audio play blocked:", err));
         }
 
-        // Bắt đầu nhịp thở
-        cycleTicks = 0;
-        executeFixedBreathingStep(chosenPace);
+        // Đổi trạng thái UI báo hiệu đang chờ
+        document.getElementById("breath-status").innerHTML = "<br><b>Đang lắng nghe hướng dẫn...</b>";
 
-        breatheInterval = setInterval(() => {
-            cycleTicks = (cycleTicks + 1) % totalCycleSeconds;
-            executeFixedBreathingStep(chosenPace);
-        }, 1000);
+        // 1. Gõ chuông
+        playPhaseSound(432, 2.5, 'sine');
+        
+        // 2. Chờ 2 giây để chuông ngân, rồi phát Voice
+        setTimeout(() => {
+            if (!isPracticing) return; // Nếu user lỡ bấm Dừng lúc đang đợi chuông
+            
+            voiceStart.currentTime = 0;
+            let playPromise = voiceStart.play();
 
-        // Bộ đếm thời gian tổng
-        totalTimerInterval = setInterval(() => {
-            totalTimeRemaining--;
-            elapsedTime++;
-            updateTimerDisplay(totalTimeRemaining);
-
-            // LOGIC CHUYỂN GIAO: Đúng 120 giây (2 phút) và thời gian tổng phải lớn hơn 2 phút
-            if (elapsedTime === BREATHING_DURATION && totalTimeRemaining > 0) {
-                transitionToMeditation();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // 3. Audio phát thành công -> Đợi khi nào đọc xong (onended) mới chạy nhịp thở
+                    voiceStart.onended = () => {
+                        if (isPracticing) startBreathingEngine(chosenPace, totalCycleSeconds);
+                    };
+                }).catch(error => {
+                    // Nếu lỗi (ví dụ chưa có file mp3), hệ thống tự động bỏ qua voice và chạy đếm nhịp luôn
+                    console.log("Bỏ qua Voice, chạy thẳng đếm nhịp");
+                    if (isPracticing) startBreathingEngine(chosenPace, totalCycleSeconds);
+                });
             }
-
-            // KẾT THÚC BÀI TẬP
-            if(totalTimeRemaining <= 0) {
-                playPhaseSound(528, 1.5, 'triangle'); 
-                
-                // THÊM DÒNG NÀY ĐỂ PHÁT GIỌNG KẾT THÚC:
-                voiceEnd.play(); 
-
-                togglePractice();
-                
-                // Thay thế alert bằng một thông báo nhẹ nhàng sau khi đọc xong (khoảng 8 giây)
-                setTimeout(() => {
-                    alert("Chúc mừng bạn đã hoàn thành bài thực hành thiền định nuôi dưỡng tâm an!");
-                }, 8000); 
-            }
-        }, 1000);
+        }, 2000);
     }
+}
+
+// HÀM MỚI: Khởi động bộ đếm nhịp thở và đồng hồ (Chỉ chạy khi Voice đã đọc xong)
+function startBreathingEngine(chosenPace, totalCycleSeconds) {
+    cycleTicks = 0;
+    executeFixedBreathingStep(chosenPace);
+
+    breatheInterval = setInterval(() => {
+        cycleTicks = (cycleTicks + 1) % totalCycleSeconds;
+        executeFixedBreathingStep(chosenPace);
+    }, 1000);
+
+    totalTimerInterval = setInterval(() => {
+        totalTimeRemaining--;
+        elapsedTime++; // Tính thời gian trôi qua cho 2 phút thở hộp
+        updateTimerDisplay(totalTimeRemaining);
+
+        // Chuyển giao sang pha Thiền định
+        if (elapsedTime === BREATHING_DURATION && totalTimeRemaining > 0) {
+            transitionToMeditation();
+        }
+
+        // KẾT THÚC BÀI TẬP
+        if (totalTimeRemaining <= 0) {
+            togglePractice();
+            
+            playPhaseSound(528, 2.5, 'sine'); 
+            setTimeout(() => { 
+                voiceEnd.currentTime = 0;
+                voiceEnd.play(); 
+            }, 2000); 
+            
+            setTimeout(() => {
+                alert("Chúc mừng bạn đã hoàn thành bài thực hành thiền định nuôi dưỡng tâm an!");
+            }, 12000); 
+        }
+    }, 1000);
 }
 
 // HÀM MỚI: Xử lý khoảnh khắc chuyển giao và bắt đầu Giai đoạn 3
@@ -295,11 +316,10 @@ function transitionToMeditation() {
     // 1. Dừng ngay bộ đếm nhịp thở hộp
     clearInterval(breatheInterval);
     
-    // 2. Phát một tiếng chuông dài sâu lắng (Tần số 432Hz - Healing frequency)
+    // 2. Phát MỘT tiếng chuông duy nhất và chờ 2 giây để phát giọng nói
     playPhaseSound(432, 2.5, 'sine');
-    // THÊM DÒNG NÀY ĐỂ PHÁT GIỌNG CHUYỂN GIAO:
-    voiceTransition.play();
-
+    setTimeout(() => { voiceTransition.play(); }, 2000);
+    
     // 3. Cập nhật UI sang Giai đoạn Chuyển giao -> Thiền định
     const phaseBadge = document.getElementById("phase-indicator");
     phaseBadge.innerText = "Giai đoạn 3: Thiền Định Chánh Niệm";
@@ -307,11 +327,11 @@ function transitionToMeditation() {
     document.getElementById("breath-status").innerHTML = "<b>Khoảnh Khắc Buông Xả...</b><br>Hãy để hơi thở diễn ra tự nhiên";
     document.getElementById("circle-text-label").innerText = "Tâm An";
     
-    // 4. Đổi Vòng tròn sang trạng thái Zen (Tĩnh lặng, Glow)
+    // 4. Đổi Vòng tròn sang trạng thái Zen
     const node = document.getElementById("breath-node");
     node.className = "breathing-circle zen-static";
     
-    // 5. Ẩn thanh Pacing (Nhịp hít/thở) và dòng nhắc nhở âm thanh cho đỡ rối mắt
+    // 5. Ẩn thanh Pacing
     document.getElementById("pacing-bars-container").classList.add("fade-out");
     document.getElementById("audio-hint").classList.add("fade-out");
 }

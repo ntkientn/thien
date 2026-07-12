@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiền Định - Tâm An Trí Sáng v1.1.1.20260712</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="top-nav">
+        <a href="https://ntkientn.github.io/health/" class="back-btn">&lt; Back to Healthcare</a>
+        <div class="site-branding">
+            <h1>THIỀN ĐỊNH</h1>
+            <p class="tagline">Hơi thở là sự sống • Tâm an trí sáng</p>
+        </div>
+    </header>
+
+    <!-- Tab Switching Controls -->
+    <nav class="tab-container">
+        <button class="tab-button active" onclick="switchTab(1)">📜 Đọc về Thiền</button>
+        <button class="tab-button highlight-tab" onclick="switchTab(2)">🧘 Thực tập Thiền</button>
+        <button class="tab-button" onclick="switchTab(3)">🔮 Tự nhìn lại</button>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="content-wrapper">
+
+        <!-- TAB 1: WELCOME & INSIGHTS -->
+        <section id="tab1" class="tab-content active-content">
+            <!-- Quote Section -->
+            <div class="quote-card animate-fade">
+                <span class="quote-icon">“</span>
+                <p id="daily-quote" class="quote-text">Đang tải châm ngôn sống an nhiên...</p>
+                <div class="quote-divider"></div>
+                <button class="btn-secondary" onclick="loadRandomQuote()"><span class="zoom-emoji">🪄</span> Xem thêm </button>
+            </div>
+
+            <!-- Featured Article Section -->
+            <div class="section-title-wrapper">
+                <h2 class="section-title">Bài Đọc Về Thiền</h2>
+                <p class="section-subtitle">Góc nhìn khoa học và tâm lý giúp bạn định hình tư duy tích cực, buông bỏ muộn phiền.</p>
+            </div>
+
+            <article class="featured-article animate-fade" id="featured-article-container">
+                <!-- Dynamically populated from JSON -->
+            </article>
+            
+        </section>
+
+
+        <!-- TAB 2: MEDITATION PRACTICE -->
+        <section id="tab2" class="tab-content">
+            <div class="section-title-wrapper" style="letter-spacing:0.5px">
+                <h2 class="section-title">Không Gian Thiền Định & Hơi Thở</h2>
+                <p class="section-subtitle">Bài thực tập Thiền kết hợp giữa <b>Điều hòa nhịp thở</b> (2 phút đầu) và <b>Thiền định tĩnh lặng</b>. Hãy tùy chỉnh không gian bên dưới phù hợp với bạn để bắt đầu.</p>
+            </div>
+
+            <div class="practice-dashboard">
+                <!-- Left Control Panel -->
+                <div class="control-card">
+                    <h3 class="config-title">
+                        Cấu Hình Bài Tập 
+                        <div class="tooltip-wrapper">
+                            <span class="hint-icon">❓</span>
+                            <div class="tooltip-content">
+                                <b>Cơ chế hoạt động:</b><br><br>
+                                • <b>2 Phút đầu (Luyện thở):</b> Hệ thống sẽ phát âm thanh hướng dẫn nhịp hít-giữ-thở-nghỉ để bạn neo giữ tâm trí, cắt đứt căng thẳng. Mặc định dùng khung 4-4-4-4 giây. Bạn có thể set lại 5-5-5-5 hoặc 6-6-6-6 nếu muốn.<br><br>
+                                • <b>Thời gian còn lại (Thiền định):</b> Có chuông báo chuyển giao. Hệ thống ngừng đếm nhịp, bạn thả lỏng hoàn toàn và thiền trong tĩnh lặng cùng nhạc nền.<br><br>
+                                • Bạn hãy chọn <b>nhạc nền và thời lượng</b> phù hợp cho buổi thiền của mình nhé!
+                            </div>
+                        </div>
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="bg-music"><b>🎵 Âm thanh không gian nền:</b></label>
+                        <select id="bg-music">
+                            <option value="bgmusic/Calima - Full Moon (freetouse.com).mp3" selected>Full Moon - Calima</option>
+                            <option value="bgmusic/Tieng chuong chua.mp3">Tiếng chuông chùa</option>
+                            <option value="bgmusic/Tibetan Flute.mp3">Tibetan Flute</option>
+                            <option value="bgmusic/Tibetan Healing Sound.mp3">Tibetan Healing Sound</option>
+                            <option value="bgmusic/Aylex - Meditation (freetouse.com).mp3">Meditation - Aylex</option>
+                            <option value="bgmusic/Aeris - Home (freetouse.com).mp3">Home - Aeris</option>
+                            <option value="bgmusic/Aeris - Galaxy in Your Eyes (freetouse.com).mp3">Galaxy in your eyes - Aeris</option>
+                            <option value="bgmusic/Alegend - Destiny (freetouse.com).mp3">Destiny - Alegend</option>
+                            <option value="bgmusic/Calima - Autumn Bliss (freetouse.com).mp3">Autumn Bliss - Calima</option>
+                            <option value="bgmusic/Calima - Forest Zen (freetouse.com).mp3">Forest Zen - Calima</option>
+                            <option value="bgmusic/Calima - Glass Shop (freetouse.com).mp3">Glass Shop - Calima</option>
+                            <option value="bgmusic/Calima - Himalayas (freetouse.com).mp3">Himalayas - Calima</option>
+                            <option value="bgmusic/Epic Spectrum - Morning Light (freetouse.com).mp3">Morning Light - Epic Spectrum</option>
+                            <option value="bgmusic/Epic Spectrum - Timeless (freetouse.com).mp3">Timeless - Epic Spectrum</option>
+                            <option value="bgmusic/Moavii - Butterflies (freetouse.com).mp3">Butterfilies - Moavii</option>
+                            <option value="bgmusic/Pufino - Careful (freetouse.com).mp3">Careful - Pufino</option>
+                            <option value="bgmusic/Pufino - Harmony (freetouse.com).mp3">Harmony - Pufino</option>
+                            <option value="bgmusic/Pufino - Rainy (freetouse.com).mp3">Rainny - Pufino</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="breath-pace"><span class="zoom-emoji">↔</span> Khung Nhịp Thở (số giây):</label>
+                        <select id="breath-pace">
+                            <option value="4" selected>4 - 4 - 4 - 4 (Chuẩn - Giúp bình ổn)</option>
+                            <option value="5">5 - 5 - 5 - 5 (Thở sâu hơn - Tĩnh tâm)</option>
+                            <option value="6">6 - 6 - 6 - 6 (Chuyên sâu - Thiền sâu)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="practice-duration"><span class="zoom-emoji">⏱</span> Chọn Thời Lượng:</label>
+                        <select id="practice-duration">
+                            <option value="180">3 Phút (Giảm căng thẳng cấp tốc)</option>
+                            <option value="300" selected>5 Phút (Bình ổn tâm trí)</option>
+                            <option value="600">10 Phút (Tập trung sâu)</option>
+                            <option value="900">15 Phút (Nuôi dưỡng năng lượng)</option>
+                            <option value="1200">20 Phút (Thiền định sâu)</option>
+                            <option value="1800">30 Phút (Buông thư toàn diện)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group checklist-group">
+                        <label><b><span class="zoom-emoji">👇</span> Chuẩn bị trước khi thiền:</b></label>
+                        <ul>
+                            <li>✓ Ngồi thẳng lưng, thả lỏng vai và cơ mặt.</li>
+                            <li>✓ Nhắm mắt lại và hướng sự chú ý vào đầu mũi.</li>
+                            <li>✓ Lắng nghe tín hiệu hướng dẫn nhịp thở phát theo khung 4,5, hoặc 6 giây.</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- Right Interaction Display (Optimized for both keeping open or closing eyes) -->
+                <div class="visualizer-card">
+                    <button style="letter-spacing:1px" id="btn-start-practice" class="btn-success" onclick="togglePractice()"><span class="zoom-emoji">🧘</span> Bắt Đầu Thiền</button>
+                    
+                    <div id="phase-indicator" class="phase-badge hidden">Giai đoạn 1: Luyện Thở</div>
+                    
+                    <div class="timer-display" id="timer-text">05:00</div>
+                    
+                    <div class="pacing-bars" id="pacing-bars-container">
+                        <div class="pace-phase" id="phase-hit">Hít vào... </div>
+                        <div class="pace-phase" id="phase-giu1">Giữ hơi thở </div>
+                        <div class="pace-phase" id="phase-tho">Thở ra... </div>
+                        <div class="pace-phase" id="phase-giu2">Nghỉ </div>
+                    </div>
+                    
+                    <div id="breath-status" class="breathing-state-text"><br>Sẵn Sàng</div>
+
+                    <div class="breathing-circle-wrapper">
+                        <div class="breathing-circle" id="breath-node"></div>
+                        <div class="breathing-state-text" id="circle-text-label">Hơi thở</div>
+                    </div>
+                    <p class="audio-hint-notice" id="audio-hint">❗ Nhớ lắng nghe âm thanh hướng dẫn nhịp điệu khi bạn nhắm mắt thiền.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- TAB 3: MINDFULNESS SURVEY -->
+        <section id="tab3" class="tab-content">
+            <div class="section-title-wrapper">
+                <h2 class="section-title">Đánh Giá Tình Trạng Tâm Trí</h2>
+                <p class="section-subtitle">Bộ câu hỏi trắc nghiệm chánh niệm giúp bạn thấu hiểu bản thân, theo dõi sự thay đổi năng lượng tâm trí theo thời gian thực tập Thiền.</p>
+            </div>
+
+            <div class="survey-layout">
+                <!-- Survey Form -->
+                <div class="survey-card" id="survey-form-block">
+                    <form id="mindfulness-form" onsubmit="processSurvey(event)">
+                        <!-- Q1 -->
+                        <div class="survey-question">
+                            <p class="q-title">1. Khi gặp tình huống bất ngờ trái ý (kẹt xe, trễ hẹn, đồng nghiệp tranh cãi), bạn thường phản ứng như thế nào?</p>
+                            <label class="radio-option"><input type="radio" name="q1" value="4" required> Lập tức nổi giận, tranh cãi hoặc bực bội kéo dài suốt buổi.</label>
+                            <label class="radio-option"><input type="radio" name="q1" value="3"> Khó chịu, càu nhàu trong lòng nhưng cố kìm nén vào trong.</label>
+                            <label class="radio-option"><input type="radio" name="q1" value="2"> Thoáng thoáng bực mình rồi nhanh chóng quên đi sau vài phút.</label>
+                            <label class="radio-option"><input type="radio" name="q1" value="1"> Thản nhiên đón nhận, hiểu rằng đó là một phần của cuộc sống.</label>
+                        </div>
+
+                        <!-- Q2 -->
+                        <div class="survey-question">
+                            <p class="q-title">2. Bạn có thường xuyên nhận biết được hơi thở của chính mình trong ngày không?</p>
+                            <label class="radio-option"><input type="radio" name="q2" value="4" required> Không bao giờ chú ý, chỉ thở một cách vô thức.</label>
+                            <label class="radio-option"><input type="radio" name="q2" value="3"> Thỉnh thoảng nhớ ra khi cơ thể quá mệt mỏi hoặc kiệt sức.</label>
+                            <label class="radio-option"><input type="radio" name="q2" value="2"> Thường xuyên nhận biết được khi ngồi yên tĩnh hoặc thư giãn.</label>
+                            <label class="radio-option"><input type="radio" name="q2" value="1"> Luôn luôn kết nối tốt với hơi thở, biết rõ mình đang thở nông hay sâu.</label>
+                        </div>
+
+                        <!-- Q3 -->
+                        <div class="survey-question">
+                            <p class="q-title">3. Khả năng tập trung vào một công việc đơn lẻ của bạn hiện tại như thế nào?</p>
+                            <label class="radio-option"><input type="radio" name="q3" value="4" required> Rất kém, liên tục bị xao nhãng bởi điện thoại, tin nhắn hoặc suy nghĩ miên man.</label>
+                            <label class="radio-option"><input type="radio" name="q3" value="3"> Ở mức trung bình, thỉnh thoảng mất tập trung và mất thời gian quay lại guồng.</label>
+                            <label class="radio-option"><input type="radio" name="q3" value="2"> Khá tốt, có thể làm việc tập trung liên tục khoảng 30-45 phút.</label>
+                            <label class="radio-option"><input type="radio" name="q3" value="1"> Xuất sắc, dễ dàng đưa tâm trí vào trạng thái dòng chảy sâu (Flow state).</label>
+                        </div>
+
+                        <!-- Q4 -->
+                        <div class="survey-question">
+                            <p class="q-title">4. Giấc ngủ của bạn trong thời gian gần đây có trọn vẹn không?</p>
+                            <label class="radio-option"><input type="radio" name="q4" value="4" required> Khó ngủ, trằn trọc suy nghĩ về công việc hoặc lo âu về tương lai.</label>
+                            <label class="radio-option"><input type="radio" name="q4" value="3"> Ngủ chập chờn, dễ giật mình tỉnh giấc và cảm thấy mệt mỏi vào sáng hôm sau.</label>
+                            <label class="radio-option"><input type="radio" name="q4" value="2"> Ngủ khá ổn, thỉnh thoảng mới có đêm mất ngủ do áp lực lớn.</label>
+                            <label class="radio-option"><input type="radio" name="q4" value="1"> Ngủ sâu giấc, dễ đi vào giấc ngủ và tỉnh dậy tràn đầy năng lượng.</label>
+                        </div>
+
+                        <!-- Q5 -->
+                        <div class="survey-question">
+                            <p class="q-title">5. Khi làm việc hoặc giao tiếp, bạn có bị các suy nghĩ về quá khứ hoặc lo lắng tương lai chi phối?</p>
+                            <label class="radio-option"><input type="radio" name="q5" value="4" required> Thường xuyên dằn vặt chuyện cũ hoặc lo sợ thái quá về những việc chưa xảy ra.</label>
+                            <label class="radio-option"><input type="radio" name="q5" value="3"> Có diễn ra khá nhiều khiến tâm trí luôn trong trạng thái bận rộn, căng thẳng.</label>
+                            <label class="radio-option"><input type="radio" name="q5" value="2"> Thỉnh thoảng xuất hiện suy nghĩ vẩn vơ nhưng kiểm soát được.</label>
+                            <label class="radio-option"><input type="radio" name="q5" value="1"> Hoàn toàn sống trong khoảnh khắc hiện tại, tâm trí tỉnh thức trọn vẹn.</label>
+                        </div>
+
+                        <!-- Q6 -->
+                        <div class="survey-question">
+                            <p class="q-title">6. Mức độ hiểu biết hoặc trải nghiệm thực hành thiền định của bạn đang ở bậc nào?</p>
+                            <label class="radio-option"><input type="radio" name="q6" value="4" required> Hoàn toàn chưa biết gì và chưa bao giờ thử thiền.</label>
+                            <label class="radio-option"><input type="radio" name="q6" value="3"> Có tìm hiểu qua sách báo nhưng chưa biết cách thực hành chuẩn chỉnh.</label>
+                            <label class="radio-option"><input type="radio" name="q6" value="2"> Đã từng thử vài lần nhưng chưa thể duy trì đều đặn hàng ngày.</label>
+                            <label class="radio-option"><input type="radio" name="q6" value="1"> Đang thực hành thiền đều đặn và hiểu rõ lợi ích cốt lõi.</label>
+                        </div>
+
+                        <!-- Q7 -->
+                        <div class="survey-question">
+                            <p class="q-title">7. Khi cơ thể mỏi mệt hoặc đau nhức (đau vai gáy, nhức đầu), bạn đối xử với nó thế nào?</p>
+                            <label class="radio-option"><input type="radio" name="q7" value="4" required> Bực bội, khó chịu và lạm dụng ngay thuốc giảm đau nhanh.</label>
+                            <label class="radio-option"><input type="radio" name="q7" value="3"> Phớt lờ, cố gắng chịu đựng gồng gượng tiếp tục làm việc quên mình.</label>
+                            <label class="radio-option"><input type="radio" name="q7" value="2"> Nhận biết được và dành chút thời gian nghỉ ngơi xoa bóp nhẹ.</label>
+                            <label class="radio-option"><input type="radio" name="q7" value="1"> Lắng nghe sâu cơ thể, thực hiện bài thở buông thư để xoa dịu vùng đau.</label>
+                        </div>
+
+                        <!-- Q8 -->
+                        <div class="survey-question">
+                            <p class="q-title">8. Bạn có khả năng tha thứ và buông bỏ lỗi lầm của người khác nhanh không?</p>
+                            <label class="radio-option"><input type="radio" name="q8" value="4" required> Rất khó buông bỏ, giữ lòng thù hận hoặc ấm ức rất lâu trong lòng.</label>
+                            <label class="radio-option"><input type="radio" name="q8" value="3"> Mất nhiều tuần hoặc nhiều tháng dằn vặt suy nghĩ mới nguôi ngoai.</label>
+                            <label class="radio-option"><input type="radio" name="q8" value="2"> Chỉ giận lúc đó, sau một vài ngày là bình thường hóa mối quan hệ.</label>
+                            <label class="radio-option"><input type="radio" name="q8" value="1"> Thấu cảm sâu sắc, buông bỏ ngay lập tức để giữ bình yên cho chính mình.</label>
+                        </div>
+
+                        <!-- Q9 -->
+                        <div class="survey-question">
+                            <p class="q-title">9. Tần suất bạn cảm thấy trống rỗng, mất phương hướng hoặc chán nản vô cớ là bao nhiêu?</p>
+                            <label class="radio-option"><input type="radio" name="q9" value="4" required> Hầu như ngày nào cũng cảm thấy tiêu cực, uể oải vô định.</label>
+                            <label class="radio-option"><input type="radio" name="q9" value="3"> Vài lần trong tuần, đặc biệt là khi áp lực công việc tăng cao dồn dập.</label>
+                            <label class="radio-option"><input type="radio" name="q9" value="2"> Hiếm khi xảy ra, chỉ khi có biến cố lớn trong cuộc sống cá nhân.</label>
+                            <label class="radio-option"><input type="radio" name="q9" value="1"> Không bao giờ, luôn tìm thấy niềm vui và ý nghĩa trong từng hành động nhỏ.</label>
+                        </div>
+
+                        <!-- Q10 -->
+                        <div class="survey-question">
+                            <p class="q-title">10. Bạn có dành thời gian kết nối với thiên nhiên (cây cối, đi dạo, nhìn trời mây) không?</p>
+                            <label class="radio-option"><input type="radio" name="q10" value="4" required> Không hề, cả ngày chỉ ở trong phòng kín ôm máy tính và điện thoại.</label>
+                            <label class="radio-option"><input type="radio" name="q10" value="3"> Rất hiếm khi, thỉnh thoảng cuối tuần mới đi cà phê ngoài trời.</label>
+                            <label class="radio-option"><input type="radio" name="q10" value="2"> Thỉnh thoảng có chăm sóc cây cảnh trong nhà hoặc ngắm cảnh ban công.</label>
+                            <label class="radio-option"><input type="radio" name="q10" value="1"> Thường xuyên dành thời gian đi bộ, tưới cây, tận hưởng không khí trong lành.</label>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; font-size: 16px;">📊 Gửi Câu Trả Lời & Xem Kết Quả</button>
+                    </form>
+                </div>
+
+                <!-- Result & History Sidebar Area -->
+                <div class="results-sidebar">
+                    <div class="result-card hidden" id="survey-result-box">
+                        <h3>Kết Quả Của Bạn</h3>
+                        <div class="score-badge" id="score-number">0 / 40</div>
+                        <p class="score-status" id="score-status-text">Trạng thái tâm trí</p>
+                        <div class="advice-box" id="advice-text">Lời khuyên của chuyên gia sẽ hiển thị tại đây...</div>
+                        <button class="btn-secondary" style="width:100%; margin-top:10px;" onclick="resetSurveyForm()">🔄 Làm Lại Khảo Sát</button>
+                    </div>
+
+                    <div class="history-card">
+                        <h3>📈 Lịch Sử Biến Chuyển Tâm Trí</h3>
+                        <p class="history-intro">Kết quả các lần khảo sát trước được lưu tại đây để bạn theo dõi sự chuyển hóa:</p>
+                        <ul id="history-list" class="history-list-items">
+                            <li class="empty-history">Chưa có dữ liệu khảo sát trước đó. Hãy hoàn thành bài test đầu tiên!</li>
+                        </ul>
+                        <button class="btn-danger-light" onclick="clearSurveyHistory()">🗑️ Xóa Lịch Sử</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- YOUTUBE RECOMMENDATIONS SECTION (SHARED VALUE) -->
+        <footer class="youtube-section">
+            <div class="section-title-wrapper">
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 22px; color: #2c4a3e;">▶ Video hữu ích cho thực tập Thiền</h3>
+                <p style="color: #666; font-size: 13px;">Tuyển chọn những video hướng dẫn thiền định, điều hòa hơi thở, tâm an trí sáng.</p>
+            </div>
+            <div class="youtube-grid">
+                <a href="https://www.youtube.com/watch?v=inpok4MKVLM" target="_blank" class="yt-link-card">
+                    <span class="yt-icon">▶</span>
+                    <div>
+                        <h4>Thiền Chánh Niệm Cho Người Mới Bắt Đầu</h4>
+                        <p>Hướng dẫn chi tiết từng tư thế ngồi và điều hướng suy nghĩ căn bản.</p>
+                    </div>
+                </a>
+                <a href="https://www.youtube.com/watch?v=Kz7vK6_OndY" target="_blank" class="yt-link-card">
+                    <span class="yt-icon">▶</span>
+                    <div>
+                        <h4>Âm Nhạc Tần Số Chữa Lành Độc Đáo 432Hz</h4>
+                        <p>Nhạc sóng não thư giãn, giải tỏa stress tích tụ và giúp ngủ sâu giấc.</p>
+                    </div>
+                </a>
+                <a href="https://www.youtube.com/watch?v=F28MGLlpP90" target="_blank" class="yt-link-card">
+                    <span class="yt-icon">▶</span>
+                    <div>
+                        <h4>Bài Thiền Buông Thư Giải Tỏa Sự Giận Dữ</h4>
+                        <p>Phương pháp làm dịu hệ thần kinh khi gặp những cảm xúc bất an, tiêu cực.</p>
+                    </div>
+                </a>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <p>&copy; Nguyen Trung Kien 2026. All rights reserved.</p>
+        <p class="footer-subtext">Thiết kế tinh tế vì một cộng đồng sống khỏe, bình an và tỉnh thức.</p>
+    </footer>
+
+    <!-- Audio Utilities for Meditation Box Breathing Base Cues -->
+    <audio id="audio-bg-player" loop></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>

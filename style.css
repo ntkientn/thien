@@ -1,0 +1,900 @@
+/* Zen-style design color palette based on Sage Green, Warm Clay, and soft muted cream background */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #f7f5f0;
+    color: #333d38;
+    line-height: 1.6;
+    padding-bottom: 40px;
+}
+
+
+/* Custom Typography Headers */
+h1, h2, h3, .quote-text {
+    font-family: 'Playfair Display', serif;
+}
+
+.zoom-emoji {
+    display: inline-block;   /* Bắt buộc phải có để transform hoạt động */
+    transform: scale(1.4);   /* Phóng to emoji lên 1.3 lần (130%) - anh có thể chỉnh số này */
+    vertical-align: middle;  /* Cân giữa emoji với dòng chữ bên cạnh */
+    margin-right: 6px;       /* Tạo một chút khoảng cách nhẹ với chữ */
+}
+/* Top Screen Header Line */
+.top-nav {
+    background-color: #ffffff;
+    padding: 15px 30px;
+    border-bottom: 1px solid #e5dfd3;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.back-btn {
+    font-size: 13px;
+    font-weight: 500;
+    color: #5a7365;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.back-btn:hover {
+    color: #2c4a3e;
+    text-decoration: underline;
+}
+
+.site-branding {
+    text-align: center;
+    margin-top: 5px;
+}
+
+.site-branding h1 {
+    font-size: 30px;
+    letter-spacing: 4px;
+    color: #2c4a3e;
+    font-weight: 800;
+}
+
+.site-branding .tagline {
+    font-size: 12.5px;
+    color: #7a8a81;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* Tabs Container System */
+.tab-container {
+    display: flex;
+    justify-content: center;
+    background-color: #eae3d5;
+    padding: 8px;
+    max-width: 600px;
+    margin: 25px auto;
+    border-radius: 18px;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 10px 24px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    border-radius: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-button:hover {
+    color: #2c4a3e;
+}
+
+.tab-button.active {
+    background-color: #2c4a3e;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(44, 74, 62, 0.2);
+}
+
+.highlight-tab {
+    font-weight: 600;
+    color: #1b3d2f;
+}
+
+/* Page Layout Wrapper */
+.content-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Section Title Modifiers */
+.section-title-wrapper {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 24px;
+    color: #2c4a3e;
+    margin-bottom: 6px;
+}
+
+.section-subtitle {
+    font-size: 15px;
+    color: #6b7770;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Tab Switching Structural classes */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active-content {
+    display: block;
+}
+
+/* TAB 1: Quote Box styling */
+.quote-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    border: 1px solid #eae3d5;
+    max-width: 800px;
+    margin: 0 auto 40px auto;
+    position: relative;
+}
+
+.quote-icon {
+    font-size: 60px;
+    color: #d1c7b7;
+    position: absolute;
+    top: 10px;
+    left: 30px;
+    font-family: serif;
+    line-height: 1;
+}
+
+.quote-text {
+    font-size: 20px;
+    font-style: italic;
+    color: #3b4d43;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 15px;
+}
+
+.quote-divider {
+    width: 60px;
+    height: 2px;
+    background-color: #2c4a3e;
+    margin: 15px auto;
+    opacity: 0.3;
+}
+
+/* TAB 1: Articles styling */
+.featured-article {
+    background-color: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    border: 1px solid #eae3d5;
+    display: flex;
+    flex-direction: column;
+}
+
+@media(min-width: 768px) {
+    .featured-article {
+        flex-direction: row;
+    }
+}
+
+.article-img-box {
+    flex: 1;
+    min-height: 250px;
+    background-size: cover;
+    background-position: center;
+}
+
+.article-body {
+    flex: 1.2;
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.article-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8c7662;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.article-title {
+    font-size: 22px;
+    color: #2c4a3e;
+    margin-bottom: 15px;
+    line-height: 1.3;
+}
+
+.article-para {
+    font-size: 15.5px;
+    letter-spacing: 0.3px;
+    color: #4a544f;
+    margin-bottom: 15px;
+}
+
+/* TAB 2: Breathing Practice Dashboard */
+.practice-dashboard {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+@media(min-width: 850px) {
+    .practice-dashboard {
+        grid-template-columns: 1.1fr 1.4fr;
+    }
+}
+
+.control-card, .visualizer-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    border: 1px solid #eae3d5;
+    letter-spacing: 0.5px;
+}
+
+.control-card h3 {
+    color: #2c4a3e;
+    font-size: 18px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #f0eae1;
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #4a544f;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd2ce;
+    background-color: #fafaf9;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    outline: none;
+}
+
+.checklist-group ul {
+    list-style: none;
+    margin-top: 8px;
+}
+
+.checklist-group li {
+    font-size: 14px;
+    font-weight: 600;
+    color: #616d66;
+    margin-bottom: 6px;
+    background: #f4f6f5;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+/* Visualizer Card Layout with Interactive Node */
+.visualizer-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, #ffffff, #faf8f5);
+    min-height: 400px;
+    text-align: center;
+}
+
+.timer-display {
+    font-size: 40px;
+    font-weight: 400;
+    color: #2c4a3e;
+    letter-spacing: 2px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.breathing-circle-wrapper {
+    width: 220px;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 25px;
+}
+
+/* =========================================================================
+   FIXED BREATHING CIRCLE ANIMATION LOGIC
+   Uses 4 specific classes: REST, INHALE, HOLD, EXHALE
+   Transition applied dynamically in JS only when needed to maintain static hold.
+   ========================================================================= */
+.breathing-circle {
+    width: 100px;
+    height: 100px;
+    background-color: rgba(44, 74, 62, 0.05);
+    border: 2px solid #2c4a3e;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 1;
+    /* transition: all 4s linear; <-- REMOVED here. Applied via class or style in JS. */
+}
+
+/* Defines the size states for transitions */
+.state-small {
+    width: 100px;
+    height: 100px;
+}
+
+.state-large {
+    width: 200px;
+    height: 200px;
+}
+
+/* 1. INHALE State (Apply transition in JS for 4s, goes small -> large) */
+.breathing-circle.inhale-active {
+    background-color: rgba(44, 74, 62, 0.2);
+}
+
+/* 2. HOLD State (REVISED: MUST STAY LARGE, NO TRANSITION) */
+.breathing-circle.hold-static {
+    width: 200px; /* Force still */
+    height: 200px;
+    background-color: rgba(140, 118, 98, 0.2);
+    border-color: #8c7662;
+    transition: none !important; /* Force standing still */
+}
+
+/* 3. EXHALE State (Apply transition in JS for 4s, goes large -> small) */
+.breathing-circle.exhale-active {
+    background-color: rgba(44, 74, 62, 0.15);
+}
+
+/* 4. REST/Nghỉ State (REVISED: MUST STAY SMALL, NO TRANSITION) */
+.breathing-circle.rest-static {
+    width: 100px; /* Force still */
+    height: 100px;
+    background-color: rgba(44, 74, 62, 0.03);
+    transition: none !important; /* Force standing still */
+}
+
+
+
+.breathing-state-text {
+    position: relative;
+    z-index: 2;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c4a3e;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pacing-bars {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    max-width: 360px;
+    margin-bottom: 30px;
+}
+
+.pace-phase {
+    flex: 1;
+    font-size: 14px;
+    padding: 6px 2px;
+    background-color: #eae3d5;
+    border-radius: 4px;
+    color: #777;
+    transition: all 0.3s ease;
+}
+
+.pace-phase.active-phase {
+    background-color: #2c4a3e;
+    color: #fff;
+    font-weight: 700;
+}
+
+.audio-hint-notice {
+    font-size: 15px;
+    color: #7a8a81;
+    margin-top: 10px;
+}
+
+/* TAB 3: Survey Styles */
+.survey-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+@media(min-width: 900px) {
+    .survey-layout {
+        grid-template-columns: 1.6fr 1fr;
+    }
+}
+
+.survey-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    border: 1px solid #eae3d5;
+}
+
+.survey-question {
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f5eff0;
+}
+
+.q-title {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: #2c4a3e;
+    margin-bottom: 10px;
+}
+
+.radio-option {
+    display: block;
+    font-size: 14.5px;
+    color: #4a544f;
+    margin-bottom: 8px;
+    cursor: pointer;
+    background-color: #faf9f6;
+    padding: 10px 14px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.radio-option:hover {
+    background-color: #f0eae1;
+}
+
+.radio-option input {
+    margin-right: 8px;
+    accent-color: #2c4a3e;
+}
+
+/* Sidebar Elements (Results & History) */
+.results-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.result-card {
+    background-color: #eef4f1;
+    border: 1px solid #cce2d7;
+    border-radius: 16px;
+    padding: 25px;
+    text-align: center;
+}
+
+.result-card h3 {
+    color: #1b3d2f;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.score-badge {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2c4a3e;
+    margin: 10px 0;
+}
+
+.score-status {
+    font-size: 15px;
+    font-weight: 600;
+    color: #8c7662;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+.advice-box {
+    font-size: 14.5px;
+    color: #3b4440;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+    border-left: 4px solid #2c4a3e;
+    line-height: 1.5;
+}
+
+.history-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid #eae3d5;
+}
+
+.history-card h3 {
+    font-size: 16px;
+    color: #2c4a3e;
+    margin-bottom: 10px;
+}
+
+.history-intro {
+    font-size: 13.5px;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.history-list-items {
+    list-style: none;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.history-list-items li {
+    font-size: 13px;
+    padding: 10px;
+    border-bottom: 1px solid #f5f0e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-list-items li:last-child {
+    border-bottom: none;
+}
+
+.empty-history {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    padding: 20px 0 !important;
+}
+
+/* Video Section Footer Links */
+.youtube-section {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    margin: 40px 0;
+    border: 1px solid #eae3d5;
+}
+
+.youtube-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+@media(min-width: 768px) {
+    .youtube-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.yt-link-card {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background-color: #faf8f5;
+    padding: 15px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.yt-link-card:hover {
+    border-color: #2c4a3e;
+    background-color: #f1ede6;
+    transform: translateY(-2px);
+}
+
+.yt-icon {
+    background-color: #c23b22;
+    color: #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.yt-link-card h4 {
+    font-size: 14.5px;
+    color: #2c4a3e;
+    margin-bottom: 4px;
+}
+
+.yt-link-card p {
+    font-size: 12.5px;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Button UI Components */
+.btn-primary, .btn-secondary, .btn-success, .btn-danger-light {
+    font-family: inherit;
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13.5px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #2c4a3e;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1b3d2f;
+}
+
+.btn-secondary {
+    background-color: #eae3d5;
+    color: #4a544f;
+}
+
+.btn-secondary:hover {
+    background-color: #dcd3c1;
+}
+
+.btn-success {
+    background-color: #48725e;
+    color: white;
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.btn-success:hover {
+    background-color: #355646;
+}
+
+.btn-success.active-stop {
+    background-color: #a35c4c;
+}
+
+.btn-success.active-stop:hover {
+    background-color: #824436;
+}
+
+.btn-danger-light {
+    background: none;
+    color: #a35c4c;
+    font-size: 12px;
+    padding: 4px 10px;
+}
+
+.btn-danger-light:hover {
+    text-decoration: underline;
+}
+
+/* Global Footer Area */
+.site-footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: #7a8a81;
+    font-size: 13px;
+    border-top: 1px solid #eae3d5;
+    margin-top: 5px;
+}
+
+.footer-subtext {
+    font-size: 11.5px;
+    margin-top: 5px;
+    opacity: 0.8;
+}
+
+/* Dynamic Animation utilities */
+.animate-fade {
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Thêm quy định cách khoảng khi auto scroll lên đầu bài viết */
+#featured-article-container {
+    scroll-margin-top: 100px; /* Nhường chỗ 90px cho thanh Header cố định */
+}
+
+/* --- FIX LẠI THANH NAVIGATION (HIỆU ỨNG KÍNH MỜ APPLE) --- */
+
+/* 1. Vẫn cho Logo trôi đi */
+header, #header, .header {
+    position: relative !important;
+    top: auto !important;
+}
+
+/* 2. Biến thanh "viên thuốc" thành thanh ngang Full màn hình + Kính mờ */
+nav, .nav, .tabs, .menu, #nav-bar {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+    
+    /* Ép tràn viền, xóa bo góc và khoảng trống phía trên */
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    padding: 15px 0 !important; /* Căn chỉnh độ dày của thanh */
+    
+    /* Tạo hiệu ứng Kính mờ (Frosted Glass) */
+    background-color: rgba(255, 255, 255, 0.8) !important; /* Nền trắng trong suốt 80% */
+    backdrop-filter: blur(12px) !important; /* Làm nhòe phần chữ cuộn bên dưới */
+    -webkit-backdrop-filter: blur(12px) !important; /* Hỗ trợ trình duyệt Safari/iPhone */
+    
+    /* Thêm một đường viền siêu mỏng ở mép dưới để tạo ranh giới */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: none !important; /* Tắt bóng đổ cũ cho thanh thoát */
+    
+    /* Đảm bảo các nút bấm vẫn nằm giữa */
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.tab-content, .tab-pane, #main-content, main {
+    padding-top: 30px !important;
+}
+
+/* --- TRẠNG THÁI MỚI: THIỀN TĨNH (GIAI ĐOẠN 3) --- */
+.phase-badge {
+    margin-top: 15px;
+    padding: 5px 15px;
+    background-color: #eae3d5;
+    color: #2c4a3e;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Vòng tròn khi thiền tĩnh: Đứng im, tỏa sáng nhẹ (Glow) */
+.breathing-circle.zen-static {
+    width: 150px; /* Kích thước cân đối vừa phải */
+    height: 150px;
+    background-color: rgba(44, 74, 62, 0.08);
+    border: 2px solid rgba(44, 74, 62, 0.4);
+    box-shadow: 0 0 30px rgba(44, 74, 62, 0.15);
+    transition: all 2s ease-in-out !important; /* Chuyển đổi mượt từ trạng thái thở */
+    animation: zenPulse 4s infinite alternate; /* Nhịp đập vô thức rất nhẹ */
+}
+
+@keyframes zenPulse {
+    from { box-shadow: 0 0 20px rgba(44, 74, 62, 0.1); transform: scale(1); }
+    to { box-shadow: 0 0 40px rgba(44, 74, 62, 0.25); transform: scale(1.02); }
+}
+
+/* Ẩn các phần tử không cần thiết bằng class */
+.fade-out {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+}
+
+/* --- TOOLTIP HƯỚNG DẪN CẤU HÌNH --- */
+.config-title {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Khoảng cách giữa chữ và icon */
+}
+
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.hint-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background-color: #eae3d5;
+    color: #2c4a3e;
+    font-size: 12px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.tooltip-wrapper:hover .hint-icon {
+    background-color: #2c4a3e;
+    color: #fff;
+}
+
+.tooltip-content {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 130%; /* Hiện xuống dưới icon */
+    left: 0;
+    background-color: #2c4a3e;
+    color: #fff;
+    text-align: left;
+    padding: 15px;
+    border-radius: 10px;
+    width: 280px;
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.5;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    z-index: 100;
+    pointer-events: none;
+}
+
+/* Mũi tên nhỏ trỏ lên trên của Tooltip */
+.tooltip-content::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 8px; /* Canh mũi tên ngay dưới icon */
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent #2c4a3e transparent;
+}
+
+/* Hiển thị tooltip khi hover */
+.tooltip-wrapper:hover .tooltip-content {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(5px);
+}

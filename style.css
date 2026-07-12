@@ -411,18 +411,20 @@ h1, h2, h3, .quote-text {
     display: flex;
     gap: 8px;
     width: 100%;
-    max-width: 360px;
+    max-width: 460px;
     margin-bottom: 30px;
 }
 
 .pace-phase {
     flex: 1;
     font-size: 14px;
-    padding: 6px 2px;
+    padding: 6px 4px; /* SỬA Ở ĐÂY: Tăng padding 2 bên lên một chút cho đẹp */
     background-color: #eae3d5;
     border-radius: 4px;
     color: #777;
     transition: all 0.3s ease;
+    letter-spacing: 0.5px; 
+    white-space: nowrap; /* THÊM MỚI: Bắt buộc chữ không bao giờ rớt xuống dòng */
 }
 
 .pace-phase.active-phase {
@@ -799,7 +801,7 @@ nav, .nav, .tabs, .menu, #nav-bar {
     padding: 5px 15px;
     background-color: #eae3d5;
     color: #2c4a3e;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
     border-radius: 20px;
     text-transform: uppercase;

@@ -322,7 +322,7 @@ function transitionToMeditation() {
     
     // 3. Cập nhật UI sang Giai đoạn Chuyển giao -> Thiền định
     const phaseBadge = document.getElementById("phase-indicator");
-    phaseBadge.innerText = "Giai đoạn 3: Thiền Định Chánh Niệm";
+    phaseBadge.innerText = "Giai đoạn 2: Thiền Định Chánh Niệm";
     
     document.getElementById("breath-status").innerHTML = "<b>Khoảnh Khắc Buông Xả...</b><br>Hãy để hơi thở diễn ra tự nhiên";
     document.getElementById("circle-text-label").innerText = "Tâm An";

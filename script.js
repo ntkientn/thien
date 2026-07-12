@@ -176,7 +176,7 @@ function playPhaseSound(frequency, duration, type = 'sine') {
 
 // Thêm biến global để theo dõi thời gian đã trôi qua
 let elapsedTime = 0; 
-const BREATHING_DURATION = 20; // 2 phút (120 giây)
+const BREATHING_DURATION = 120; // 2 phút (120 giây)
 
 function togglePractice() {
     initAudioContext();

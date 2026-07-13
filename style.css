@@ -11,6 +11,9 @@ body {
     color: #333d38;
     line-height: 1.6;
     padding-bottom: 40px;
+    /* THÊM 2 DÒNG NÀY ĐỂ TRỊ BỆNH TRÀN MÀN HÌNH */
+    overflow-x: hidden; 
+    max-width: 100vw;
 }
 
 
@@ -407,12 +410,20 @@ h1, h2, h3, .quote-text {
     letter-spacing: 1px;
 }
 
+/* Sửa lại khung chứa thanh nhịp thở */
 .pacing-bars {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Trên mobile mặc định xếp thành 2 cột x 2 hàng */
     gap: 8px;
     width: 100%;
-    max-width: 460px;
+    max-width: 480px;
     margin-bottom: 30px;
+}
+/* Khi màn hình lớn hơn (Tablet, PC), tự động dàn lại thành 1 hàng 4 cột */
+@media(min-width: 500px) {
+    .pacing-bars {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 .pace-phase {

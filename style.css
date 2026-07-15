@@ -918,3 +918,123 @@ nav, .nav, .tabs, .menu, #nav-bar {
     opacity: 1;
     transform: translateX(-50%) translateY(5px);
 }
+
+/* --- MODAL KẾT THÚC BÀI TẬP --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    visibility: visible;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal-content {
+    background: #f7f5f0;
+    padding: 25px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.hidden .modal-content {
+    transform: translateY(20px); /* Hiệu ứng trượt nhẹ từ dưới lên */
+}
+
+.modal-title { color: #2c4a3e; margin-bottom: 8px; font-size: 20px; }
+.modal-desc { font-size: 13.5px; color: #555; margin-bottom: 20px; line-height: 1.5; }
+
+.benefit-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.chip {
+    background: #eae3d5;
+    border: 1px solid transparent;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #2c4a3e;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.chip.active {
+    background: #2c4a3e;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(44, 74, 62, 0.3);
+}
+
+.modal-actions { display: flex; gap: 12px; }
+.modal-actions button {
+    flex: 1; padding: 12px; border-radius: 8px; font-weight: 600;
+    cursor: pointer; border: none; transition: 0.2s; font-family: inherit;
+}
+.btn-skip { background: transparent; color: #777; border: 1px solid #ccc !important; }
+.btn-skip:hover { background: #e5e5e5; }
+.btn-save { background: #2c4a3e; color: #fff; }
+.btn-save:hover { background: #1e332a; }
+
+/* --- Lịch sử Thiền tập ở Tab 2 --- */
+#tab-practice .history-section {
+    margin-top: 40px; /* Tạo khoảng cách rộng rãi với phần bài tập ở trên */
+    border-top: 1px dashed #eae3d5; /* Đường gạch nhẹ phân cách */
+    padding-top: 30px;
+}
+
+#tab-practice .history-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Đóng khung và thêm thanh cuộn cho Lịch sử thực tập */
+#practice-history-container {
+    max-height: 450px; /* Giới hạn chiều cao (khoảng 3-4 records hiển thị) */
+    overflow-y: auto;  /* Tự động hiện thanh cuộn dọc nếu vượt quá chiều cao */
+    padding-right: 8px; /* Cách lề một chút để thanh cuộn không đè vào chữ */
+}
+
+/* Tùy chỉnh thanh cuộn cho mượt và đẹp (Chuẩn Zen) */
+#practice-history-container::-webkit-scrollbar {
+    width: 6px;
+}
+#practice-history-container::-webkit-scrollbar-track {
+    background: #f7f5f0; 
+    border-radius: 10px;
+}
+#practice-history-container::-webkit-scrollbar-thumb {
+    background: #d4ccb8; 
+    border-radius: 10px;
+}
+#practice-history-container::-webkit-scrollbar-thumb:hover {
+    background: #b5ac95; 
+}
+
+/* Trên màn hình máy tính lớn, tự động chia thành 2 hoặc 3 cột cho đỡ trống trải */
+@media(min-width: 768px) {
+    #tab-practice .history-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

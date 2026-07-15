@@ -16,7 +16,15 @@ const voiceEnd = new Audio('voice/3_bai_thuc_tap_da_hoan_tat.mp3');
 document.addEventListener("DOMContentLoaded", () => {
     fetchSiteData();
     renderSurveyHistory();
+    renderPracticeHistory();
     
+    // THÊM ĐOẠN NÀY: Tự động khôi phục lại Tab đang đứng trước khi Refresh
+    const savedActiveTab = localStorage.getItem('activeTab');
+    if (savedActiveTab) {
+        // Tìm nút bấm tab tương ứng và giả lập cú click chuột để kích hoạt nó
+        switchTab(parseInt(savedActiveTab));
+    }
+
     // Tự động cập nhật nhãn số giây của thanh tiến trình 
     const paceSelect = document.getElementById("breath-pace");
     if (paceSelect) {
@@ -153,6 +161,8 @@ function switchTab(tabIndex) {
     if (tabIndex !== 2 && isPracticing) {
         togglePractice();
     }
+    // THÊM DÒNG NÀY: Ghi nhớ Tab hiện tại đang mở
+    localStorage.setItem('activeTab', tabIndex);
 }
 
 /* ==========================================================================
@@ -320,14 +330,12 @@ function startBreathingEngine(chosenPace, totalCycleSeconds) {
                 voiceEnd.play(); 
             }, 2000); 
             
-            setTimeout(() => {
-                alert("Chúc mừng bạn đã hoàn thành bài thực hành thiền định nuôi dưỡng tâm an!");
-            }, 12000); 
+            setTimeout(() => { showCompletionModal(); }, 10000);
         }
     }, 1000);
 }
 
-// HÀM MỚI: Xử lý khoảnh khắc chuyển giao và bắt đầu Giai đoạn 3
+// HÀM: Xử lý khoảnh khắc chuyển giao và bắt đầu Giai đoạn 3
 function transitionToMeditation() {
     // 1. Dừng ngay bộ đếm nhịp thở hộp
     clearInterval(breatheInterval);
@@ -436,6 +444,146 @@ function executeFixedBreathingStep(pace) {
     }
     else if (cycleTicks > pace * 3 && cycleTicks < pace * 4) {
         phases[3].classList.add("active-phase");
+    }
+}
+
+// --- HỆ THỐNG MODAL ĐÁNH GIÁ SAU THIỀN ---
+let selectedBenefits = [];
+
+function showCompletionModal() {
+    // Reset lại trạng thái các nút bấm (Bỏ chọn hết)
+    selectedBenefits = [];
+    document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+    
+    // Hiển thị modal
+    document.getElementById('completion-modal').classList.remove('hidden');
+}
+
+// Bắt sự kiện chọn nhiều Chip (Multiple-click)
+document.getElementById('benefit-chips').addEventListener('click', (e) => {
+    if(e.target.classList.contains('chip')) {
+        e.target.classList.toggle('active'); // Đổi màu
+        const value = e.target.getAttribute('data-value');
+        
+        if(e.target.classList.contains('active')) {
+            selectedBenefits.push(value); // Thêm vào danh sách
+        } else {
+            selectedBenefits = selectedBenefits.filter(b => b !== value); // Bỏ ra khỏi danh sách
+        }
+    }
+});
+
+// Xử lý nút LƯU
+document.getElementById('btn-save-modal').addEventListener('click', () => {
+    saveMeditationSession(selectedBenefits);
+    document.getElementById('completion-modal').classList.add('hidden');
+    
+    // Đợi modal mờ đi một chút (0.3 giây) để không bị giật cục, rồi refresh trang
+    setTimeout(() => { window.location.reload(); }, 300); 
+});
+
+// Xử lý nút BỎ QUA 
+document.getElementById('btn-skip-modal').addEventListener('click', () => {
+    saveMeditationSession([]);
+    document.getElementById('completion-modal').classList.add('hidden');
+    
+    // Tương tự, đợi 0.3s rồi refresh
+    setTimeout(() => { window.location.reload(); }, 300);
+});
+
+// Hàm lưu trữ data vào Local Storage
+function saveMeditationSession(benefits) {
+    // Lấy số phút vừa tập từ giao diện (Ví dụ thẻ select thời lượng)
+    const durationSelect = document.getElementById("practice-duration");
+    const durationText = durationSelect.options[durationSelect.selectedIndex].text.split(' ')[0]; // Lấy chữ số (VD: "5", "10")
+    
+    // Tạo data ngày tháng
+    const today = new Date();
+    const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+
+    // Lấy lịch sử cũ hoặc tạo mảng mới
+    let practiceHistory = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+    
+    practiceHistory.push({
+        date: dateString,
+        timestamp: Date.now(),
+        duration: durationText, // Lưu "5" hoặc "10" (Phút)
+        benefits: benefits // Mảng các giá trị đã chọn
+    });
+    
+    localStorage.setItem('zenPracticeHistory', JSON.stringify(practiceHistory));
+    console.log("Đã lưu lịch sử thiền:", practiceHistory);
+    
+    // (Tuỳ chọn) Nếu bạn có hàm render lại Tab 3, gọi nó ở đây
+    // if(typeof renderSurveyHistory === 'function') renderSurveyHistory();
+}
+
+// HÀM HIỂN THỊ LỊCH SỬ THIỀN 
+// Biến toàn cục để kiểm soát số lượng hiển thị
+let historyDisplayLimit = 10;
+
+function renderPracticeHistory() {
+    const container = document.getElementById('practice-history-container');
+    const viewAllContainer = document.getElementById('view-all-container');
+    if (!container) return;
+
+    const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+    const reversedHistory = [...history].reverse();
+
+    if (reversedHistory.length === 0) {
+        container.innerHTML = '<p style="color: #777; font-size: 14px; text-align: center; padding: 20px;">Bạn chưa có dữ liệu thực tập nào. Hãy bắt đầu bài thiền đầu tiên nhé!</p>';
+        if (viewAllContainer) viewAllContainer.innerHTML = '';
+        return;
+    }
+
+    // Cắt dữ liệu theo limit hiện tại
+    const displayHistory = reversedHistory.slice(0, historyDisplayLimit);
+
+    let htmlContent = '';
+    displayHistory.forEach(session => {
+        let benefitsHtml = '';
+        if (session.benefits && session.benefits.length > 0) {
+            benefitsHtml = session.benefits.map(b => `<span class="history-chip" style="background: #eae3d5; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #2c4a3e;">${b}</span>`).join('');
+        } else {
+            benefitsHtml = `<span class="history-chip" style="border: 1px dashed #ccc; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #777;">Chỉ tĩnh lặng</span>`;
+        }
+
+        htmlContent += `
+            <div class="history-card" style="background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <strong style="color: #2c4a3e;">⏱️ ${session.duration} Phút</strong>
+                    <span style="color: #888; font-size: 12px;">${session.date}</span>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    ${benefitsHtml}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = htmlContent;
+
+    // Xử lý nút Xem tất cả
+    if (viewAllContainer) {
+        if (reversedHistory.length > historyDisplayLimit) {
+            viewAllContainer.innerHTML = `
+                <button id="btn-view-all-history" style="background: transparent; border: 1px solid #2c4a3e; color: #2c4a3e; padding: 8px 20px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: 0.2s;">
+                    Xem tất cả (${reversedHistory.length})
+                </button>
+            `;
+            
+            // Gắn sự kiện click để mở rộng limit và render lại
+            document.getElementById('btn-view-all-history').addEventListener('click', () => {
+                historyDisplayLimit = reversedHistory.length; // Mở khóa toàn bộ
+                renderPracticeHistory(); // Vẽ lại
+                
+                // Đổi chữ trên tiêu đề để người dùng khỏi bỡ ngỡ
+                const titleSpan = document.querySelector('.history-section .section-title span');
+                if(titleSpan) titleSpan.innerText = `(Toàn bộ ${reversedHistory.length} lần)`;
+            });
+        } else {
+            viewAllContainer.innerHTML = ''; // Ẩn nút nếu đã hiển thị hết
+        }
     }
 }
 

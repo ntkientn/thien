@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thiền Định - Tâm An Trí Sáng v1.1.2.20260712</title>
+    <title>Thiền Định - Tâm An Trí Sáng v1.1.1.20260712</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,11 +152,48 @@
                         <div class="breathing-circle" id="breath-node"></div>
                         <div class="breathing-state-text" id="circle-text-label">Hơi thở</div>
                     </div>
-                    <p class="audio-hint-notice" id="audio-hint">❗ Bạn nhớ lắng nghe âm thanh hướng dẫn nhịp nhở ở giai đoạn đầu. Giai đoạn sau hãy buông xả để hơi thở hoàn toàn tự nhiên.</p>
+                    <p class="audio-hint-notice" id="audio-hint">
+                        ❗ <b>Lưu ý:</b> Nhớ lắng nghe âm thanh hướng dẫn nhịp thở ở 2 phút đầu. Giai đoạn sau, hãy buông xả để hơi thở diễn ra hoàn toàn tự nhiên.
+                    </p>
                 </div>
+            </div>
+
+            <div class="history-section">
+                <h3 class="section-title">
+                    Lịch Sử Thiền Tập 
+                </h3>
+                <div id="practice-history-container" class="history-container"></div>
+                <!-- nút Xem thêm -->
+                <div id="view-all-container" style="text-align: center; margin-top: 15px;"></div>
             </div>
         </section>
 
+            <!-- MODAL KẾT THÚC THIỀN -->
+        <div id="completion-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3 class="modal-title">✨ Chúc mừng bạn!</h3>
+                <p class="modal-desc">Bạn vừa dành tặng bản thân một khoảng lặng tuyệt vời. Hãy ghi nhận những chuyển biến tích cực lúc này (có thể chọn nhiều):</p>
+                
+                <div class="benefit-chips" id="benefit-chips">
+                    <!-- Nhóm Trạng thái Tâm trí & Cảm xúc -->
+                    <button class="chip" data-value="Nhẹ nhõm & Buông xả">🍃 Nhẹ nhõm & Buông xả</button>
+                    <button class="chip" data-value="Tâm trí sáng tỏ">☀️ Tâm trí sáng tỏ</button>
+                    <button class="chip" data-value="Tươi mới & Tỉnh thức">✨ Tươi mới & Tỉnh thức</button>
+                    <!-- Nhóm Thể chất (Cảm nhận vật lý) -->
+                    <button class="chip" data-value="Nhịp tim bình ổn">💗 Nhịp tim bình ổn</button>
+                    <button class="chip" data-value="Cơ thể thư thái">🧘 Cơ thể thư thái</button>
+                    <!-- Nhóm Năng lực cốt lõi & Nhận thức -->
+                    <button class="chip" data-value="Định tâm vững chãi">⛰️ Định tâm vững chãi</button>
+                    <button class="chip" data-value="Khơi sáng trực giác">💡 Khơi sáng trực giác</button>
+                    <button class="chip" data-value="Chánh niệm, trọn vẹn hiện tại">💠 Chánh niệm, trọn vẹn hiện tại</button>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-skip" id="btn-skip-modal">Bỏ qua</button>
+                    <button class="btn-save" id="btn-save-modal">Lưu ghi nhận</button>
+                </div>
+            </div>
+        </div>
 
         <!-- TAB 3: MINDFULNESS SURVEY -->
         <section id="tab3" class="tab-content">

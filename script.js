@@ -17,12 +17,26 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchSiteData();
     renderSurveyHistory();
     
-    // Tự động cập nhật nhãn số giây (4s, 5s, 6s) của các thanh tiến trình khi đổi option nhịp thở
+    // Tự động cập nhật nhãn số giây của thanh tiến trình 
     const paceSelect = document.getElementById("breath-pace");
     if (paceSelect) {
         updatePaceLabels(parseInt(paceSelect.value));
         paceSelect.addEventListener("change", (e) => {
             updatePaceLabels(parseInt(e.target.value));
+        });
+    }
+
+    // THÊM MỚI: Tự động cập nhật số phút hiển thị khi đổi thời lượng bài tập
+    const durationSelect = document.getElementById("practice-duration");
+    if (durationSelect) {
+        // Cập nhật ngay lần đầu tải trang để chắc chắn đồng bộ
+        updateTimerDisplay(parseInt(durationSelect.value)); 
+        
+        // Cập nhật mỗi khi user thay đổi option
+        durationSelect.addEventListener("change", (e) => {
+            if (!isPracticing) { // Chỉ update khi đang không thiền
+                updateTimerDisplay(parseInt(e.target.value));
+            }
         });
     }
 });
@@ -151,7 +165,7 @@ function initAudioContext() {
 }
 
 // PHẦN CẬP NHẬT TĂNG ÂM LƯỢNG TIẾNG BEEP CHUYỂN PHA
-function playPhaseSound(frequency, d, type = 'sine') {
+function playPhaseSound(frequency, duration, type = 'sine') {
     if (!audioCtx) return;
     try {
         let osc = audioCtx.createOscillator();
@@ -162,13 +176,13 @@ function playPhaseSound(frequency, d, type = 'sine') {
         
         // Đã tăng từ 0.12 lên 0.5 giúp âm thanh hiệu lệnh nghe rõ ràng, sắc nét hơn
         gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
         
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
         
         osc.start();
-        osc.stop(audioCtx.currentTime + d);
+        osc.stop(audioCtx.currentTime + duration);
     } catch (e) {
         console.log("Audio cue muted.");
     }
@@ -205,7 +219,9 @@ function togglePractice() {
         startBtn.classList.remove("active-stop");
         
         resetBreathingVisuals();
-        
+        // Khôi phục lại mặt đồng hồ theo đúng option đang chọn
+        updateTimerDisplay(parseInt(durationSelect.value));
+
         phaseBadge.classList.add("hidden");
         pacingBars.classList.remove("fade-out");
         audioHint.classList.remove("fade-out");

@@ -89,10 +89,11 @@ let editingRecordId = null;
 // Initialize when DOM content is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
     fetchSiteData();
-    renderSurveyHistory();
     renderPracticeHistory();
     renderBenefitChipsUI(); // Vẽ UI cho các nút chọn giá trị đạt được sau khi thiền
-    
+    renderDashboard(); // Gọi hàm tính toán Dashboard
+    renderSurveyHistory();
+
     // THÊM ĐOẠN NÀY: Tự động khôi phục lại Tab đang đứng trước khi Refresh
     const savedActiveTab = localStorage.getItem('activeTab');
     if (savedActiveTab) {
@@ -410,7 +411,7 @@ function startBreathingEngine(chosenPace, totalCycleSeconds) {
     }, 1000);
 }
 
-// HÀM: Xử lý khoảnh khắc chuyển giao và bắt đầu Giai đoạn 3
+// HÀM: Xử lý khoảnh khắc chuyển giao và bắt đầu Giai đoạn 2
 function transitionToMeditation() {
     // 1. Dừng ngay bộ đếm nhịp thở hộp
     clearInterval(breatheInterval);
@@ -670,16 +671,16 @@ function generateHistoryHTML(historyArray) {
         }
 
         // Cấu trúc lại UI: Ngày tháng làm Header nổi bật
+        // Thay vì dùng thẻ bọc (Card) như cũ, giờ chuyển sang dạng dòng (List Item)
         htmlContent += `
-            <div class="history-card" style="background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px; border: 1px solid #f2f2f2;">
+            <div class="history-list-item" style="padding: 16px 0; border-bottom: 1px solid #f0f0f0;">
                 
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed #eee;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
                     
                     <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
                         <strong style="color: #2c4a3e; font-size: 16px; letter-spacing: 0.3px;">
                             📅 ${dateStr}
                         </strong>
-                        
                         <span style="color: #888; font-size: 13px;">
                             lúc ${timeStr} <span style="margin: 0 4px; color: #ddd;">•</span> ⏳ ${session.duration} Phút
                         </span>
@@ -693,6 +694,7 @@ function generateHistoryHTML(historyArray) {
                 <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                     ${benefitsHtml}
                 </div>
+                
             </div>
         `;
     });
@@ -783,6 +785,119 @@ function openEditModal(recordId) {
 
     // 4. Hiển thị Modal
     modal.classList.remove('hidden');
+}
+
+function renderDashboard() {
+    const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+    if (history.length === 0) return; // Nếu chưa tập lần nào thì giữ nguyên số 0 mặc định
+
+    let totalMinutes = 0;
+    let totalSessions = history.length;
+    let currentMonthDays = new Set(); // Dùng Set để đếm số ngày không bị trùng lặp
+    let timeBlocks = { "Sáng (5h-12h)": 0, "Chiều (12h-18h)": 0, "Tối (18h-23h)": 0, "Đêm (23h-5h)": 0 };
+    let benefitCounts = {};
+
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    history.forEach(record => {
+        // 1. Cộng dồn thời gian
+        totalMinutes += parseInt(record.duration) || 0;
+
+        const dateObj = new Date(record.isoDate || record.timestamp);
+
+        // 2. Đếm số ngày Active trong tháng hiện tại
+        if (dateObj.getMonth() === currentMonth && dateObj.getFullYear() === currentYear) {
+            currentMonthDays.add(dateObj.getDate());
+        }
+
+        // 3. Phân nhóm khung giờ
+        const hour = dateObj.getHours();
+        if (hour >= 5 && hour < 12) timeBlocks["Sáng (5h-12h)"]++;
+        else if (hour >= 12 && hour < 18) timeBlocks["Chiều (12h-18h)"]++;
+        else if (hour >= 18 && hour < 23) timeBlocks["Tối (18h-23h)"]++;
+        else timeBlocks["Đêm (23h-5h)"]++;
+
+        // 4. Đếm Tần suất Benefit
+        if (record.benefits && record.benefits.length > 0) {
+            record.benefits.forEach(b => {
+                benefitCounts[b] = (benefitCounts[b] || 0) + 1;
+            });
+        }
+    });
+
+    // --- TÌM GIÁ TRỊ LỚN NHẤT (Khung giờ & Lợi ích) ---
+    let favoriteTime = "--";
+    let maxTimeCount = 0;
+    for (const [time, count] of Object.entries(timeBlocks)) {
+        if (count > maxTimeCount) {
+            maxTimeCount = count;
+            favoriteTime = time;
+        }
+    }
+
+    let topBenefit = "🍃 Đơn thuần tĩnh tọa"; 
+    let maxBenefitCount = 0;
+    for (const [benefit, count] of Object.entries(benefitCounts)) {
+        if (count > maxBenefitCount) {
+            maxBenefitCount = count;
+            topBenefit = benefit;
+        }
+    }
+
+    // --- ĐỔ DỮ LIỆU LÊN GIAO DIỆN (DOM) ---
+    
+    // Xử lý logic hiển thị Giờ/Phút thông minh
+    let timeDisplay = `${totalMinutes} <span class="stat-unit">Phút</span>`;
+    if (totalMinutes >= 60) {
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        timeDisplay = `${hours} <span class="stat-unit">Giờ</span> ${mins > 0 ? `${mins} <span class="stat-unit">Phút</span>` : ''}`;
+    }
+
+    document.getElementById('stat-total-time').innerHTML = timeDisplay;
+    document.getElementById('stat-total-sessions').innerText = `Qua ${totalSessions} lần ngồi lại`;
+    document.getElementById('stat-active-days').innerHTML = `${currentMonthDays.size} <span class="stat-unit">Ngày</span>`;
+    document.getElementById('stat-favorite-time').innerText = favoriteTime;
+    document.getElementById('stat-top-benefit').innerText = `✨ ${topBenefit}`;
+}
+
+// === LOGIC CHUYỂN TAB (THỐNG KÊ <-> LỊCH SỬ) ===
+const tabStats = document.getElementById('tab-stats');
+const tabHistory = document.getElementById('tab-history');
+const contentStats = document.getElementById('content-stats');
+const contentHistory = document.getElementById('content-history');
+
+if (tabStats && tabHistory) {
+    tabStats.addEventListener('click', () => {
+        // Đổi màu nút
+        tabStats.style.background = '#fff';
+        tabStats.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+        tabStats.style.color = '#2c4a3e';
+        
+        tabHistory.style.background = 'transparent';
+        tabHistory.style.boxShadow = 'none';
+        tabHistory.style.color = '#888';
+
+        // Hiển thị nội dung
+        contentStats.style.display = 'block';
+        contentHistory.style.display = 'none';
+    });
+
+    tabHistory.addEventListener('click', () => {
+        // Đổi màu nút
+        tabHistory.style.background = '#fff';
+        tabHistory.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+        tabHistory.style.color = '#2c4a3e';
+        
+        tabStats.style.background = 'transparent';
+        tabStats.style.boxShadow = 'none';
+        tabStats.style.color = '#888';
+
+        // Hiển thị nội dung
+        contentHistory.style.display = 'block';
+        contentStats.style.display = 'none';
+    });
 }
 
 /* ==========================================================================

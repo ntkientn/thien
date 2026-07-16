@@ -172,10 +172,15 @@
                 </div>
 
                 <div id="content-stats" style="padding: 24px;">
+        
                     <div class="stat-section" style="padding-top: 0;">
                         <div class="stat-label">Tổng thời gian</div>
-                        <div class="stat-value" id="stat-total-time">0 <span class="stat-unit">Phút</span></div>
-                        <div class="stat-subtext" id="stat-total-sessions">Qua 0 lần ngồi lại</div>
+                        <div class="stat-inline-group">
+                            <span class="stat-value" id="stat-total-time-val">0</span>
+                            <span class="stat-unit" id="stat-total-time-unit">phút qua</span>
+                            <span class="stat-value" id="stat-total-sessions-val">0</span>
+                            <span class="stat-unit">lần thiền tập</span>
+                        </div>
                     </div>
 
                     <div class="board-divider"></div>
@@ -183,25 +188,40 @@
                     <div class="stat-row-2">
                         <div class="stat-section">
                             <div class="stat-label">Tháng này</div>
-                            <div class="stat-value" id="stat-active-days">0 <span class="stat-unit">Ngày</span></div>
-                            <div class="stat-subtext">Đã duy trì tĩnh tại</div>
+                            <div class="stat-inline-group">
+                                <span class="stat-value" id="stat-active-days">0</span>
+                                <span class="stat-unit">ngày tĩnh tại</span>
+                            </div>
                         </div>
                         <div class="board-divider-vertical"></div>
                         <div class="stat-section">
-                            <div class="stat-label">Khung giờ quen</div>
-                            <div class="stat-value stat-text-value" id="stat-favorite-time">--</div>
-                            <div class="stat-subtext">Bạn thường tập nhất</div>
+                            <div class="stat-label">Mạch duy trì</div>
+                            <div class="stat-inline-group">
+                                <span class="stat-value" id="stat-week-streak">0</span>
+                                <span class="stat-unit">tuần liên tiếp</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="board-divider"></div>
 
-                    <div class="stat-section" style="background: #fcf9f5; margin: 0 -24px -24px -24px; padding: 20px 24px;">
-                        <div class="stat-label">Trạng thái thường gặp nhất</div>
-                        <div class="stat-value stat-text-value" id="stat-top-benefit" style="color: #d87b41; margin-top: 4px;">
-                            Chưa có dữ liệu
+                    <div class="stat-section">
+                        <div class="stat-label">Khung giờ quen</div>
+                        <div class="stat-inline-group">
+                            <span class="stat-value stat-text-value" id="stat-favorite-time">--</span>
+                            <span class="stat-unit">là lúc bạn thường tập nhất</span>
                         </div>
                     </div>
+
+                    <div class="board-divider"></div>
+
+                    <div class="stat-section">
+                        <div class="stat-label">Giá trị đạt được nhiều nhất</div>
+                        <div id="stat-top-benefits" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;">
+                            <span style="color: #888; font-size: 14px;">Chưa có dữ liệu</span>
+                        </div>
+                    </div>
+                    
                 </div>
 
                 <div id="content-history" style="display: none; padding: 0 24px 24px 24px;">

@@ -12,8 +12,34 @@ const voiceStart = new Audio('voice/1_chao_ban_hay_ngoi_thang_lung_tha_long.mp3'
 const voiceTransition = new Audio('voice/2_bay_gio_hay_buong_long_su_kiem_soat.mp3');
 const voiceEnd = new Audio('voice/3_bai_thuc_tap_da_hoan_tat.mp3');
 
+function autoMigrateData() {
+    let history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+    if (history.length === 0) return;
+
+    // Kiểm tra xem bản ghi đầu tiên có bị thiếu 'id' (chuẩn mới) không
+    // Nếu có 'id' rồi thì chứng tỏ máy này đã ngon, kết thúc hàm ngay lập tức
+    if (history[0].id) return; 
+
+    // Nếu lọt xuống đây, chứng tỏ máy này (mobile của anh) chứa data cũ
+    let updatedHistory = history.map(record => {
+        if (record.id) return record; 
+        let dateObj = new Date(record.timestamp);
+        return {
+            id: record.timestamp,
+            isoDate: dateObj.toISOString(),
+            displayDate: `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')} - ${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`,
+            duration: parseInt(record.duration),
+            benefits: record.benefits || []
+        };
+    });
+
+    localStorage.setItem('zenPracticeHistory', JSON.stringify(updatedHistory));
+    console.log("Đã tự động Migrate Data ngầm!");
+}
+
 // Initialize when DOM content is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
+    autoMigrateData(); // LUÔN CHẠY TRƯỚC TIÊN ĐỂ MIGRATE DATA
     fetchSiteData();
     renderSurveyHistory();
     renderPracticeHistory();

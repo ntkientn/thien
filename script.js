@@ -687,7 +687,7 @@ function generateHistoryHTML(historyArray) {
                     </div>
 
                     <button class="btn-edit-record" data-id="${session.id}" style="background: transparent; border: none; color: #aaa; font-size: 13px; cursor: pointer; white-space: nowrap;">
-                        <span style="text-decoration: underline;">Chỉnh sửa</span>
+                        <span style="text-decoration: underline;">✏️</span>
                     </button>
                 </div>
                 
@@ -789,44 +789,77 @@ function openEditModal(recordId) {
 
 function renderDashboard() {
     const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
-    if (history.length === 0) return; // Nếu chưa tập lần nào thì giữ nguyên số 0 mặc định
+    if (history.length === 0) return;
 
     let totalMinutes = 0;
     let totalSessions = history.length;
-    let currentMonthDays = new Set(); // Dùng Set để đếm số ngày không bị trùng lặp
+    let currentMonthDays = new Set();
     let timeBlocks = { "Sáng (5h-12h)": 0, "Chiều (12h-18h)": 0, "Tối (18h-23h)": 0, "Đêm (23h-5h)": 0 };
     let benefitCounts = {};
+    let weekStarts = new Set(); // Dùng để tính Week Streak
 
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
-    history.forEach(record => {
-        // 1. Cộng dồn thời gian
-        totalMinutes += parseInt(record.duration) || 0;
+    // Hàm phụ trợ: Lấy ngày Thứ Hai của tuần chứa ngày d
+    function getMonday(d) {
+        let date = new Date(d);
+        let day = date.getDay();
+        let diff = date.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(date.setDate(diff)).setHours(0,0,0,0);
+    }
 
+    history.forEach(record => {
+        totalMinutes += parseInt(record.duration) || 0;
         const dateObj = new Date(record.isoDate || record.timestamp);
 
-        // 2. Đếm số ngày Active trong tháng hiện tại
+        // Đếm ngày trong tháng
         if (dateObj.getMonth() === currentMonth && dateObj.getFullYear() === currentYear) {
             currentMonthDays.add(dateObj.getDate());
         }
 
-        // 3. Phân nhóm khung giờ
+        // Đếm khung giờ
         const hour = dateObj.getHours();
         if (hour >= 5 && hour < 12) timeBlocks["Sáng (5h-12h)"]++;
         else if (hour >= 12 && hour < 18) timeBlocks["Chiều (12h-18h)"]++;
         else if (hour >= 18 && hour < 23) timeBlocks["Tối (18h-23h)"]++;
         else timeBlocks["Đêm (23h-5h)"]++;
 
-        // 4. Đếm Tần suất Benefit
+        // Đếm lợi ích
         if (record.benefits && record.benefits.length > 0) {
             record.benefits.forEach(b => {
                 benefitCounts[b] = (benefitCounts[b] || 0) + 1;
             });
         }
+
+        // Lưu lại Thứ Hai của tuần user có tập
+        weekStarts.add(getMonday(dateObj));
     });
 
-    // --- TÌM GIÁ TRỊ LỚN NHẤT (Khung giờ & Lợi ích) ---
+    // --- TÍNH TOÁN CHUỖI TUẦN (WEEK STREAK) ---
+    let sortedWeeks = Array.from(weekStarts).sort((a, b) => b - a); // Sắp xếp tuần từ mới nhất -> cũ nhất
+    let streak = 0;
+    let currentMonday = getMonday(new Date());
+    let lastMonday = currentMonday - (7 * 24 * 60 * 60 * 1000); // Trừ đi 7 ngày
+
+    if (sortedWeeks.length > 0) {
+        // Nếu user có tập trong tuần này HOẶC tuần trước, bắt đầu đếm streak = 1
+        if (sortedWeeks[0] === currentMonday || sortedWeeks[0] === lastMonday) {
+            streak = 1;
+            let checkMonday = sortedWeeks[0];
+            // Đếm ngược về quá khứ xem các tuần có liền nhau (cách nhau đúng 7 ngày) không
+            for (let i = 1; i < sortedWeeks.length; i++) {
+                if (checkMonday - sortedWeeks[i] === (7 * 24 * 60 * 60 * 1000)) {
+                    streak++;
+                    checkMonday = sortedWeeks[i];
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+    // --- TÌM KHUNG GIỜ VÀ TOP 3 LỢI ÍCH ---
     let favoriteTime = "--";
     let maxTimeCount = 0;
     for (const [time, count] of Object.entries(timeBlocks)) {
@@ -836,30 +869,41 @@ function renderDashboard() {
         }
     }
 
-    let topBenefit = "🍃 Đơn thuần tĩnh tọa"; 
-    let maxBenefitCount = 0;
-    for (const [benefit, count] of Object.entries(benefitCounts)) {
-        if (count > maxBenefitCount) {
-            maxBenefitCount = count;
-            topBenefit = benefit;
-        }
+    // Sắp xếp object benefit theo value giảm dần và lấy ra Top 3
+    let sortedBenefits = Object.entries(benefitCounts).sort((a, b) => b[1] - a[1]);
+    let top3Benefits = sortedBenefits.slice(0, 3);
+    
+    let benefitsHtml = '';
+    if (top3Benefits.length > 0) {
+        top3Benefits.forEach(item => {
+            const benefitName = item[0];
+            
+            // Tra cứu nhóm của benefit này từ Config gốc (ví dụ: 'emotional', 'physical', 'core')
+            const groupName = BENEFIT_COLOR_MAP[benefitName] || 'empty';
+            
+            // Gắn chung class 'history-chip' và 'chip-[tên-nhóm]' để dùng chung CSS với Lịch sử
+            benefitsHtml += `<span class="history-chip chip-${groupName}" style="padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 500; display: inline-block;">${benefitName}</span>`;
+        });
+    } else {
+        benefitsHtml = `<span style="color: #999; font-size: 13px;">Chưa có dữ liệu</span>`;
     }
 
-    // --- ĐỔ DỮ LIỆU LÊN GIAO DIỆN (DOM) ---
-    
-    // Xử lý logic hiển thị Giờ/Phút thông minh
-    let timeDisplay = `${totalMinutes} <span class="stat-unit">Phút</span>`;
+    // --- ĐỔ DỮ LIỆU LÊN GIAO DIỆN ---
     if (totalMinutes >= 60) {
         const hours = Math.floor(totalMinutes / 60);
         const mins = totalMinutes % 60;
-        timeDisplay = `${hours} <span class="stat-unit">Giờ</span> ${mins > 0 ? `${mins} <span class="stat-unit">Phút</span>` : ''}`;
+        document.getElementById('stat-total-time-val').innerText = hours;
+        document.getElementById('stat-total-time-unit').innerHTML = `giờ ${mins > 0 ? `${mins} phút qua` : 'qua'}`;
+    } else {
+        document.getElementById('stat-total-time-val').innerText = totalMinutes;
+        document.getElementById('stat-total-time-unit').innerText = "phút qua";
     }
 
-    document.getElementById('stat-total-time').innerHTML = timeDisplay;
-    document.getElementById('stat-total-sessions').innerText = `Qua ${totalSessions} lần ngồi lại`;
-    document.getElementById('stat-active-days').innerHTML = `${currentMonthDays.size} <span class="stat-unit">Ngày</span>`;
+    document.getElementById('stat-total-sessions-val').innerText = totalSessions;
+    document.getElementById('stat-active-days').innerText = currentMonthDays.size;
+    document.getElementById('stat-week-streak').innerText = streak;
     document.getElementById('stat-favorite-time').innerText = favoriteTime;
-    document.getElementById('stat-top-benefit').innerText = `✨ ${topBenefit}`;
+    document.getElementById('stat-top-benefits').innerHTML = benefitsHtml;
 }
 
 // === LOGIC CHUYỂN TAB (THỐNG KÊ <-> LỊCH SỬ) ===

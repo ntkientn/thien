@@ -1211,20 +1211,30 @@ nav, .nav, .tabs, .menu, #nav-bar {
     font-weight: 600;
 }
 
-.stat-value {
-    font-size: 26px; /* Tăng size để số liệu đập vào mắt */
-    font-weight: 700;
-    color: #2c4a3e;
+/* Nhóm các con số và text trên cùng 1 dòng */
+.stat-inline-group {
+    display: flex;
+    align-items: baseline; /* Căn đáy chữ bằng nhau */
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
 }
 
-.stat-text-value {
-    font-size: 16px; 
+/* Đảm bảo số nổi bật */
+.stat-value {
+    font-size: 26px; 
+    font-weight: 700;
+    color: #2c4a3e;
+    line-height: 1; /* Tránh số quá to đẩy lệch dòng */
 }
 
 .stat-unit {
     font-size: 14px;
-    font-weight: 500;
     color: #777;
+}
+
+.stat-text-value {
+    font-size: 16px; 
 }
 
 .stat-subtext {

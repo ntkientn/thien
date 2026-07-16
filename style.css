@@ -1038,3 +1038,110 @@ nav, .nav, .tabs, .menu, #nav-bar {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* Modal Practice History: Tùy chỉnh thanh cuộn cho danh sách trong Modal */
+#all-history-list::-webkit-scrollbar { width: 6px; }
+#all-history-list::-webkit-scrollbar-track { background: #f7f5f0; border-radius: 10px; }
+#all-history-list::-webkit-scrollbar-thumb { background: #d4ccb8; border-radius: 10px; }
+#all-history-list::-webkit-scrollbar-thumb:hover { background: #b5ac95; }
+
+/* --- HỆ THỐNG MÀU SẮC CHO CÁC NHÓM LỢI ÍCH --- */
+/* Thể chất */
+.chip-physical { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+/* Tâm trí & Cảm xúc */
+.chip-emotional { background-color: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+/* Năng lực cốt lõi */
+.chip-core { background-color: #e8eaf6; color: #3f51b5; border: 1px solid #c5cae9; }
+/* Mặc định (Nếu không có data) */
+.chip-empty { background-color: #f5f5f5; color: #757575; border: 1px dashed #bdbdbd; }
+
+@media (max-width: 380px) {
+    /* Ép các thẻ nhỏ lại để vừa 2 thẻ 1 dòng trên màn hình bé */
+    #benefit-chips .chip {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+/* =========================================
+   LAYOUT CHO CHIP BENEFITS (DESKTOP)
+========================================= */
+/* Mặc định trên Desktop: Hiển thị dạng Flexbox, tự động rớt dòng, bung hết cỡ */
+.chip-group-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+    padding-bottom: 16px;
+}
+
+/* =========================================
+   LAYOUT CHO CHIP BENEFITS (MOBILE)
+========================================= */
+/* Khi màn hình nhỏ hơn 768px (Điện thoại), chuyển sang Grid 2 dòng vuốt ngang */
+@media (max-width: 768px) {
+    .chip-group-container {
+        display: grid;
+        grid-template-rows: repeat(2, 1fr);
+        grid-auto-flow: column;
+        grid-auto-columns: max-content;
+        justify-content: flex-start; /* Căn trái để vuốt */
+        overflow-x: auto;
+        padding-bottom: 10px;
+        padding-left: 4px;
+        padding-right: 20px;
+        scrollbar-width: none; /* Ẩn thanh cuộn Firefox */
+    }
+
+    .chip-group-container::-webkit-scrollbar {
+        display: none; /* Ẩn thanh cuộn Chrome/Safari */
+    }
+
+    /* Ép các nút không được rớt chữ thành nhiều dòng khi ở chế độ vuốt ngang */
+    .chip-group-container .chip {
+        white-space: nowrap;
+        padding: 8px 14px; /* Thu nhỏ padding lại một chút cho vừa vặn Mobile */
+    }
+}
+
+/* =========================================
+   KÍCH THƯỚC MODAL CHỈNH SỬA / KẾT THÚC
+========================================= */
+/* Mặc định trên Desktop: Modal rộng rãi, tận dụng không gian */
+.edit-modal-content {
+    width: 90%;
+    max-width: 800px; /* Tăng chiều rộng trên Desktop (anh có thể chỉnh 700px hoặc 800px tùy gu) */
+    padding: 30px 40px; /* Tăng khoảng cách lề cho thoáng */
+}
+
+/* Trên Mobile: Ép lại vừa màn hình điện thoại */
+@media (max-width: 768px) {
+    .edit-modal-content {
+        max-width: 100%;
+        width: 95%;
+        padding: 24px 20px; /* Thu nhỏ lề trên mobile */
+    }
+}
+
+/* CSS cho nút Sửa (Edit) trên thẻ lịch sử */
+.btn-edit-record {
+    background: transparent; border: none; color: #888;
+    font-size: 13px; cursor: pointer; text-decoration: underline;
+}
+.btn-edit-record:hover { color: #2c4a3e; }
+
+/* Tùy chỉnh kích thước Modal Lịch sử Thiền Tập cho Desktop và Mobile */
+.all-history-modal-content {
+    width: 95%;
+    max-width: 1000px; /* Tăng gấp đôi chiều rộng trên Desktop (cũ là 500px) */
+    height: 95vh;      /* Tăng tối đa chiều cao an toàn hiển thị (khoảng 20%) */
+    max-height: 95vh;
+}
+
+/* Modal Lịch sử Thiền Tập: Đảm bảo trên điện thoại nó vẫn hiển thị gọn gàng */
+@media (max-width: 768px) {
+    .all-history-modal-content {
+        max-width: 100%;
+        height: 90vh;
+    }
+}

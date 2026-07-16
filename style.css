@@ -1145,3 +1145,90 @@ nav, .nav, .tabs, .menu, #nav-bar {
         height: 90vh;
     }
 }
+
+/* =========================================
+   GIAO DIỆN DASHBOARD (UNIFIED BOARD)
+========================================= */
+.unified-board {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    border: 1px solid #eaeaea;
+    overflow: hidden; /* Đảm bảo bo góc cho các khối màu tràn viền bên trong */
+}
+
+/* Ẩn vạch kẻ dưới của record cuối cùng trong Lịch sử để UI được sạch */
+.history-list-item:last-child {
+    border-bottom: none !important;
+}
+
+.stat-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px 0;
+}
+
+/* Ép khoảng cách riêng cho Tầng 1 to hơn */
+.dashboard-board > .stat-section:first-child {
+    padding-top: 0;
+    padding-bottom: 16px;
+}
+
+/* Layout 2 cột cho Tầng 2 */
+.stat-row-2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stat-row-2 .stat-section {
+    flex: 1;
+}
+
+/* Các đường kẻ phân cách */
+.board-divider {
+    height: 1px;
+    background: #f0f0f0;
+    width: 100%;
+    margin: 8px 0;
+}
+
+.board-divider-vertical {
+    width: 1px;
+    height: 60px;
+    background: #f0f0f0;
+    margin: 0 24px;
+}
+
+/* Định dạng Text */
+.stat-label {
+    font-size: 11px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 26px; /* Tăng size để số liệu đập vào mắt */
+    font-weight: 700;
+    color: #2c4a3e;
+}
+
+.stat-text-value {
+    font-size: 16px; 
+}
+
+.stat-unit {
+    font-size: 14px;
+    font-weight: 500;
+    color: #777;
+}
+
+.stat-subtext {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 6px;
+}

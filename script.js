@@ -12,37 +12,86 @@ const voiceStart = new Audio('voice/1_chao_ban_hay_ngoi_thang_lung_tha_long.mp3'
 const voiceTransition = new Audio('voice/2_bay_gio_hay_buong_long_su_kiem_soat.mp3');
 const voiceEnd = new Audio('voice/3_bai_thuc_tap_da_hoan_tat.mp3');
 
-function autoMigrateData() {
-    let history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
-    if (history.length === 0) return;
+// TỪ ĐIỂN QUY ƯỚC NHÓM LỢI ÍCH (Để phân loại và tô màu)
+// === CẤU HÌNH DATA GỐC CHO HỆ THỐNG LỢI ÍCH (SINGLE SOURCE OF TRUTH) ===
+const BENEFITS_CONFIG = [
+    {
+        categoryTitle: "Tâm trí & Cảm xúc", 
+        items: [
+            { value: "Nhẹ nhõm & Buông xả", label: "🍃 Nhẹ nhõm & Buông xả", groupClass: "emotional" },
+            { value: "Tâm trí sáng tỏ", label: "☀️ Tâm trí sáng tỏ", groupClass: "emotional" },
+            { value: "Tươi mới & Tỉnh thức", label: "✨ Tươi mới & Tỉnh thức", groupClass: "emotional" },
+            { value: "Tái tạo năng lượng", label: "💪 Tái tạo năng lượng", groupClass: "emotional" }
+        ]
+    },
+    {
+        categoryTitle: "Thể chất",
+        items: [
+            { value: "Nhịp tim hơi thở bình ổn", label: "💗 Nhịp tim hơi thở bình ổn", groupClass: "physical" },
+            { value: "Cơ thể thư thái", label: "🧘 Cơ thể thư thái", groupClass: "physical" },
+            { value: "Giảm cơn đau mỏi", label: "🫧 Giảm cơn đau mỏi", groupClass: "physical" },
+            { value: "Phục hồi thể lực", label: "🏃‍♂️ Phục hồi thể lực", groupClass: "physical" }
+        ]
+    },
+    {
+        categoryTitle: "Năng lực & Nhận thức",
+        items: [
+            { value: "Tập trung tư duy sâu", label: "🎯 Tập trung tư duy sâu", groupClass: "core" },
+            { value: "Định tâm vững chãi", label: "⛰️ Định tâm vững chãi", groupClass: "core" },
+            { value: "Khơi sáng trực giác", label: "💡 Khơi sáng trực giác", groupClass: "core" },
+            { value: "Chánh niệm, trọn vẹn hiện tại", label: "💠 Chánh niệm, trọn vẹn hiện tại", groupClass: "core" }
+        ]
+    }
+];
 
-    // Kiểm tra xem bản ghi đầu tiên có bị thiếu 'id' (chuẩn mới) không
-    // Nếu có 'id' rồi thì chứng tỏ máy này đã ngon, kết thúc hàm ngay lập tức
-    if (history[0].id) return; 
-
-    // Nếu lọt xuống đây, chứng tỏ máy này (mobile của anh) chứa data cũ
-    let updatedHistory = history.map(record => {
-        if (record.id) return record; 
-        let dateObj = new Date(record.timestamp);
-        return {
-            id: record.timestamp,
-            isoDate: dateObj.toISOString(),
-            displayDate: `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')} - ${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`,
-            duration: parseInt(record.duration),
-            benefits: record.benefits || []
-        };
+// Tự động sinh ra bộ từ điển tra cứu màu sắc (Không cần viết lại BENEFIT_GROUPS thủ công nữa)
+const BENEFIT_COLOR_MAP = {};
+BENEFITS_CONFIG.forEach(category => {
+    category.items.forEach(item => {
+        BENEFIT_COLOR_MAP[item.value] = item.groupClass;
     });
+});
 
-    localStorage.setItem('zenPracticeHistory', JSON.stringify(updatedHistory));
-    console.log("Đã tự động Migrate Data ngầm!");
+// Hàm tự động sinh các nút bấm benefit vào Modal kết thúc thiền
+function renderBenefitChipsUI() {
+    const container = document.getElementById('benefit-chips');
+    if (!container) return;
+    
+    let htmlContent = '';
+    
+    BENEFITS_CONFIG.forEach(category => {
+        // 1. In ra Tiêu đề nhóm (Nhỏ, in hoa, màu xám thanh lịch)
+        htmlContent += `
+            <div style="width: 100%; text-align: center; margin-top: 10px; margin-bottom: 6px; position: relative;">
+                <span style="background: #fdfaf6; padding: 0 10px; font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; position: relative; z-index: 1;">
+                    ${category.categoryTitle}
+                </span>
+                <div style="position: absolute; top: 50%; left: 10%; right: 10%; height: 1px; background: #eaeaea; z-index: 0;"></div>
+            </div>
+        `;
+        
+        // 2. Bọc các nút của nhóm này vào một flexbox để nó hiển thị sát nhau
+        htmlContent += `<div class="chip-group-container">`;
+        
+        category.items.forEach(item => {
+            htmlContent += `<button class="chip" data-value="${item.value}">${item.label}</button>`;
+        });
+        
+        htmlContent += `</div>`; // Đóng flexbox của nhóm
+    });
+    
+    container.innerHTML = htmlContent;
 }
+
+// Biến lưu trữ ID của Practice History record đang được Edit (nếu có)
+let editingRecordId = null;
 
 // Initialize when DOM content is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
-    autoMigrateData(); // LUÔN CHẠY TRƯỚC TIÊN ĐỂ MIGRATE DATA
     fetchSiteData();
     renderSurveyHistory();
     renderPracticeHistory();
+    renderBenefitChipsUI(); // Vẽ UI cho các nút chọn giá trị đạt được sau khi thiền
     
     // THÊM ĐOẠN NÀY: Tự động khôi phục lại Tab đang đứng trước khi Refresh
     const savedActiveTab = localStorage.getItem('activeTab');
@@ -519,34 +568,40 @@ document.getElementById('btn-skip-modal').addEventListener('click', () => {
 
 // Hàm lưu trữ data vào Local Storage
 function saveMeditationSession(benefits) {
-    // Lấy số phút vừa tập từ giao diện (Ví dụ thẻ select thời lượng)
-    const durationSelect = document.getElementById("practice-duration");
-    const durationText = durationSelect.options[durationSelect.selectedIndex].text.split(' ')[0]; // Lấy chữ số (VD: "5", "10")
-    
-    // Tạo data ngày tháng
-    const today = new Date();
-    const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-
-    // Lấy lịch sử cũ hoặc tạo mảng mới
     let practiceHistory = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
     
-    practiceHistory.push({
-        date: dateString,
-        timestamp: Date.now(),
-        duration: durationText, // Lưu "5" hoặc "10" (Phút)
-        benefits: benefits // Mảng các giá trị đã chọn
-    });
+    if (editingRecordId) {
+        // TRƯỜNG HỢP 1: ĐANG EDIT RECORD CŨ
+        const recordIndex = practiceHistory.findIndex(r => r.id === editingRecordId);
+        if (recordIndex !== -1) {
+            practiceHistory[recordIndex].benefits = benefits; // Chỉ cập nhật lại lợi ích
+        }
+        editingRecordId = null; // Reset lại trạng thái
+    } else {
+        // TRƯỜNG HỢP 2: LƯU RECORD MỚI
+        const durationSelect = document.getElementById("practice-duration");
+        const durationValue = durationSelect ? durationSelect.options[durationSelect.selectedIndex].text.split(' ')[0] : "0";
+        
+        const now = new Date();
+        const record = {
+            id: now.getTime(), // ID duy nhất
+            isoDate: now.toISOString(), // Chuẩn DateTime để thống kê sau này
+            displayDate: `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} - ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
+            duration: parseInt(durationValue),
+            benefits: benefits
+        };
+        practiceHistory.push(record);
+    }
     
     localStorage.setItem('zenPracticeHistory', JSON.stringify(practiceHistory));
-    console.log("Đã lưu lịch sử thiền:", practiceHistory);
     
-    // (Tuỳ chọn) Nếu bạn có hàm render lại Tab 3, gọi nó ở đây
-    // if(typeof renderSurveyHistory === 'function') renderSurveyHistory();
+    // Refresh lại giao diện
+    renderPracticeHistory();
 }
 
 // HÀM HIỂN THỊ LỊCH SỬ THIỀN 
 // Biến toàn cục để kiểm soát số lượng hiển thị
-let historyDisplayLimit = 10;
+let historyDisplayLimit = 10; // Đổi thành 10 lần gần nhất
 
 function renderPracticeHistory() {
     const container = document.getElementById('practice-history-container');
@@ -562,32 +617,9 @@ function renderPracticeHistory() {
         return;
     }
 
-    // Cắt dữ liệu theo limit hiện tại
+    // Cắt dữ liệu 10 records cho màn hình chính
     const displayHistory = reversedHistory.slice(0, historyDisplayLimit);
-
-    let htmlContent = '';
-    displayHistory.forEach(session => {
-        let benefitsHtml = '';
-        if (session.benefits && session.benefits.length > 0) {
-            benefitsHtml = session.benefits.map(b => `<span class="history-chip" style="background: #eae3d5; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #2c4a3e;">${b}</span>`).join('');
-        } else {
-            benefitsHtml = `<span class="history-chip" style="border: 1px dashed #ccc; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #777;">Chỉ tĩnh lặng</span>`;
-        }
-
-        htmlContent += `
-            <div class="history-card" style="background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <strong style="color: #2c4a3e;">⏱️ ${session.duration} Phút</strong>
-                    <span style="color: #888; font-size: 12px;">${session.date}</span>
-                </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                    ${benefitsHtml}
-                </div>
-            </div>
-        `;
-    });
-
-    container.innerHTML = htmlContent;
+    container.innerHTML = generateHistoryHTML(displayHistory); // Dùng chung hàm sinh HTML
 
     // Xử lý nút Xem tất cả
     if (viewAllContainer) {
@@ -598,19 +630,159 @@ function renderPracticeHistory() {
                 </button>
             `;
             
-            // Gắn sự kiện click để mở rộng limit và render lại
+            // MỞ MODAL THAY VÌ XỔ RA GIAO DIỆN CHÍNH
             document.getElementById('btn-view-all-history').addEventListener('click', () => {
-                historyDisplayLimit = reversedHistory.length; // Mở khóa toàn bộ
-                renderPracticeHistory(); // Vẽ lại
-                
-                // Đổi chữ trên tiêu đề để người dùng khỏi bỡ ngỡ
-                const titleSpan = document.querySelector('.history-section .section-title span');
-                if(titleSpan) titleSpan.innerText = `(Toàn bộ ${reversedHistory.length} lần)`;
+                document.getElementById('all-history-list').innerHTML = generateHistoryHTML(reversedHistory);
+                document.getElementById('all-history-modal').classList.remove('hidden');
             });
         } else {
-            viewAllContainer.innerHTML = ''; // Ẩn nút nếu đã hiển thị hết
+            viewAllContainer.innerHTML = ''; 
         }
     }
+}
+
+// Hàm phụ trợ sinh ra mã HTML cho thẻ lịch sử (để dùng chung cho cả ngoài web lẫn trong Modal)
+function generateHistoryHTML(historyArray) {
+    let htmlContent = '';
+    historyArray.forEach(session => {
+        let benefitsHtml = '';
+        
+        if (session.benefits && session.benefits.length > 0) {
+            benefitsHtml = session.benefits.map(b => {
+                const groupName = BENEFIT_COLOR_MAP[b] || 'empty';
+                return `<span class="history-chip chip-${groupName}" style="padding: 4px 10px; border-radius: 12px; font-size: 12px; display: inline-block;">${b}</span>`;
+            }).join('');
+        } else {
+            benefitsHtml = `<span style="color: #999; font-size: 13px; font-style: italic; display: flex; align-items: center; gap: 5px;">
+                🍃 Trọn vẹn phút giây thiền tập
+            </span>`;
+        }
+
+        // Tách chuỗi hiển thị thành "Giờ" và "Ngày" riêng biệt
+        const rawDate = session.displayDate || session.date || "";
+        let timeStr = "";
+        let dateStr = rawDate;
+
+        if (rawDate.includes(" - ")) {
+            const parts = rawDate.split(" - ");
+            timeStr = parts[0].trim(); // Lấy 15:15
+            dateStr = parts[1].trim(); // Lấy 16/7/2026
+        }
+
+        // Cấu trúc lại UI: Ngày tháng làm Header nổi bật
+        htmlContent += `
+            <div class="history-card" style="background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px; border: 1px solid #f2f2f2;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed #eee;">
+                    
+                    <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
+                        <strong style="color: #2c4a3e; font-size: 16px; letter-spacing: 0.3px;">
+                            📅 ${dateStr}
+                        </strong>
+                        
+                        <span style="color: #888; font-size: 13px;">
+                            lúc ${timeStr} <span style="margin: 0 4px; color: #ddd;">•</span> ⏳ ${session.duration} Phút
+                        </span>
+                    </div>
+
+                    <button class="btn-edit-record" data-id="${session.id}" style="background: transparent; border: none; color: #aaa; font-size: 13px; cursor: pointer; white-space: nowrap;">
+                        <span style="text-decoration: underline;">Chỉnh sửa</span>
+                    </button>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    ${benefitsHtml}
+                </div>
+            </div>
+        `;
+    });
+    return htmlContent;
+}
+
+// Xử lý đóng Modal Lịch sử
+document.getElementById('btn-close-history-modal').addEventListener('click', () => {
+    document.getElementById('all-history-modal').classList.add('hidden');
+});
+
+// THUẬT TOÁN EXPORT RA FILE CSV DÀNH CHO EXCEL
+document.getElementById('btn-export-csv').addEventListener('click', () => {
+    const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+    if (history.length === 0) return;
+
+    // Chuẩn bị nội dung CSV. 
+    // Dòng "\uFEFF" là ký tự BOM bắt buộc để Excel đọc được Tiếng Việt có dấu (UTF-8).
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+    csvContent += "Ngày Thực Tập,Thời Lượng (Phút),Ghi Nhận Lợi Ích\n"; // Header cột
+
+    history.forEach(session => {
+        const date = session.date;
+        const duration = session.duration;
+        const benefits = (session.benefits && session.benefits.length > 0) ? session.benefits.join(" | ") : "Chỉ tĩnh lặng";
+        
+        // Đặt nội dung vào cặp nháy kép " " để Excel không bị ngắt cột sai nếu có dấu phẩy trong văn bản
+        csvContent += `"${date}","${duration}","${benefits}"\n`;
+    });
+
+    // Tạo lệnh tải file ngầm
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "Nhat_Ky_Thien_Dinh.csv");
+    document.body.appendChild(link);
+    
+    link.click(); // Kích hoạt tải về
+    
+    document.body.removeChild(link); // Dọn dẹp rác sau khi tải
+});
+
+// Bắt sự kiện click vào nút "Chỉnh sửa" (Dùng Event Delegation vì thẻ HTML được sinh ra động)
+document.addEventListener('click', (e) => {
+    // Dùng closest() để quét tìm element cha có class btn-edit-record
+    const editBtn = e.target.closest('.btn-edit-record');
+    
+    if (editBtn) {
+        // Lấy ID từ chính cái nút đó
+        const recordId = parseInt(editBtn.getAttribute('data-id'));
+        openEditModal(recordId);
+    }
+});
+
+function openEditModal(recordId) {
+    const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+    const record = history.find(r => r.id === recordId);
+    if (!record) return;
+
+    // Gán ID đang edit
+    editingRecordId = recordId;
+
+    // --- THÊM DÒNG NÀY ĐỂ FIX BUG: Tự động đóng Modal All History (nếu đang mở) ---
+    const historyModal = document.getElementById('all-history-modal');
+    if (historyModal && !historyModal.classList.contains('hidden')) {
+        historyModal.classList.add('hidden');
+    }
+
+    // 1. Mở lại Modal Kết Thúc Thiền (Sử dụng lại UI cũ cho đồng bộ)
+    const modal = document.getElementById('completion-modal');
+    
+    // Đổi tiêu đề để user biết đang ở chế độ Edit
+    modal.querySelector('.modal-title').innerText = "✏️ Cập nhật ghi nhận";
+    modal.querySelector('.modal-desc').innerText = `Lần tập: ${record.displayDate || record.date} (${record.duration} phút)\nBạn muốn bổ sung thêm điều gì?`;
+
+    // 2. Xóa các lựa chọn cũ trên Modal
+    document.querySelectorAll('#benefit-chips .chip').forEach(chip => {
+        chip.classList.remove('active');
+        // 3. Đánh dấu (Active) những lợi ích mà record này đã có
+        const chipValue = chip.getAttribute('data-value');
+        if (record.benefits && record.benefits.includes(chipValue)) {
+            chip.classList.add('active');
+            selectedBenefits.push(chipValue); // Push vào mảng tạm để lúc Save sẽ lưu
+        }
+    });
+
+    selectedBenefits = record.benefits ? [...record.benefits] : []; // Khởi tạo mảng selected
+
+    // 4. Hiển thị Modal
+    modal.classList.remove('hidden');
 }
 
 /* ==========================================================================

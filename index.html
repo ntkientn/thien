@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thiền Định - Tâm An Trí Sáng v1.1.1.20260712</title>
+    <title>Thiền Định - Tâm An Trí Sáng v1.1.2.20260716</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -170,27 +170,33 @@
 
             <!-- MODAL KẾT THÚC THIỀN -->
         <div id="completion-modal" class="modal-overlay hidden">
-            <div class="modal-content">
+            <div class="modal-content edit-modal-content">
+                
                 <h3 class="modal-title">✨ Chúc mừng bạn!</h3>
                 <p class="modal-desc">Bạn vừa dành tặng bản thân một khoảng lặng tuyệt vời. Hãy ghi nhận những chuyển biến tích cực lúc này (có thể chọn nhiều):</p>
                 
                 <div class="benefit-chips" id="benefit-chips">
-                    <!-- Nhóm Trạng thái Tâm trí & Cảm xúc -->
-                    <button class="chip" data-value="Nhẹ nhõm & Buông xả">🍃 Nhẹ nhõm & Buông xả</button>
-                    <button class="chip" data-value="Tâm trí sáng tỏ">☀️ Tâm trí sáng tỏ</button>
-                    <button class="chip" data-value="Tươi mới & Tỉnh thức">✨ Tươi mới & Tỉnh thức</button>
-                    <!-- Nhóm Thể chất (Cảm nhận vật lý) -->
-                    <button class="chip" data-value="Nhịp tim bình ổn">💗 Nhịp tim bình ổn</button>
-                    <button class="chip" data-value="Cơ thể thư thái">🧘 Cơ thể thư thái</button>
-                    <!-- Nhóm Năng lực cốt lõi & Nhận thức -->
-                    <button class="chip" data-value="Định tâm vững chãi">⛰️ Định tâm vững chãi</button>
-                    <button class="chip" data-value="Khơi sáng trực giác">💡 Khơi sáng trực giác</button>
-                    <button class="chip" data-value="Chánh niệm, trọn vẹn hiện tại">💠 Chánh niệm, trọn vẹn hiện tại</button>
-                </div>
+                    </div>
 
                 <div class="modal-actions">
                     <button class="btn-skip" id="btn-skip-modal">Bỏ qua</button>
                     <button class="btn-save" id="btn-save-modal">Lưu ghi nhận</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="all-history-modal" class="modal-overlay hidden">
+            <div class="modal-content all-history-modal-content" style="display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 class="modal-title" style="margin: 0;">Toàn Bộ Lịch Sử</h3>
+                    <button id="btn-close-history-modal" style="background: none; border: none; font-size: 24px; color: #888; cursor: pointer;">&times;</button>
+                </div>
+                
+                <div id="all-history-list" style="overflow-y: auto; flex: 1; margin-bottom: 20px; padding-right: 5px; text-align: left; display: grid; gap: 12px; align-content: start;">
+                    </div>
+
+                <div class="modal-actions">
+                    <button class="btn-save" id="btn-export-csv" style="width: 100%; background: #2c4a3e;">🔻 Kết xuất data ra file Excel (CSV)</button>
                 </div>
             </div>
         </div>
@@ -219,7 +225,7 @@
                         <div class="survey-question">
                             <p class="q-title">2. Bạn có thường xuyên nhận biết được hơi thở của chính mình trong ngày không?</p>
                             <label class="radio-option"><input type="radio" name="q2" value="4" required> Không bao giờ chú ý, chỉ thở một cách vô thức.</label>
-                            <label class="radio-option"><input type="radio" name="q2" value="3"> Thỉnh thoảng nhớ ra khi cơ thể quá mệt mỏi hoặc kiệt sức.</label>
+                            <label class="radio-option"><input type="radio" name="q2" value="3"> Thỉnh thoảng nhớ ra khi cảm thấy mệt mỏi, thiếu oxy hoặc kiệt sức.</label>
                             <label class="radio-option"><input type="radio" name="q2" value="2"> Thường xuyên nhận biết được khi ngồi yên tĩnh hoặc thư giãn.</label>
                             <label class="radio-option"><input type="radio" name="q2" value="1"> Luôn luôn kết nối tốt với hơi thở, biết rõ mình đang thở nông hay sâu.</label>
                         </div>
@@ -238,15 +244,15 @@
                             <p class="q-title">4. Giấc ngủ của bạn trong thời gian gần đây có trọn vẹn không?</p>
                             <label class="radio-option"><input type="radio" name="q4" value="4" required> Khó ngủ, trằn trọc suy nghĩ về công việc hoặc lo âu về tương lai.</label>
                             <label class="radio-option"><input type="radio" name="q4" value="3"> Ngủ chập chờn, dễ giật mình tỉnh giấc và cảm thấy mệt mỏi vào sáng hôm sau.</label>
-                            <label class="radio-option"><input type="radio" name="q4" value="2"> Ngủ khá ổn, thỉnh thoảng mới có đêm mất ngủ do áp lực lớn.</label>
+                            <label class="radio-option"><input type="radio" name="q4" value="2"> Ngủ khá ổn, thỉnh thoảng mới có đêm khó ngủ, thiếu ngủ do áp lực lớn.</label>
                             <label class="radio-option"><input type="radio" name="q4" value="1"> Ngủ sâu giấc, dễ đi vào giấc ngủ và tỉnh dậy tràn đầy năng lượng.</label>
                         </div>
 
                         <!-- Q5 -->
                         <div class="survey-question">
                             <p class="q-title">5. Khi làm việc hoặc giao tiếp, bạn có bị các suy nghĩ về quá khứ hoặc lo lắng tương lai chi phối?</p>
-                            <label class="radio-option"><input type="radio" name="q5" value="4" required> Thường xuyên dằn vặt chuyện cũ hoặc lo sợ thái quá về những việc chưa xảy ra.</label>
-                            <label class="radio-option"><input type="radio" name="q5" value="3"> Có diễn ra khá nhiều khiến tâm trí luôn trong trạng thái bận rộn, căng thẳng.</label>
+                            <label class="radio-option"><input type="radio" name="q5" value="4" required> Thường xuyên dằn vặt chuyện cũ hoặc lo nghĩ thái quá về những việc chưa xảy ra.</label>
+                            <label class="radio-option"><input type="radio" name="q5" value="3"> Có diễn ra khá nhiều khiến tâm trí hay rơi vào trạng thái bận rộn, căng thẳng.</label>
                             <label class="radio-option"><input type="radio" name="q5" value="2"> Thỉnh thoảng xuất hiện suy nghĩ vẩn vơ nhưng kiểm soát được.</label>
                             <label class="radio-option"><input type="radio" name="q5" value="1"> Hoàn toàn sống trong khoảnh khắc hiện tại, tâm trí tỉnh thức trọn vẹn.</label>
                         </div>
@@ -256,7 +262,7 @@
                             <p class="q-title">6. Mức độ hiểu biết hoặc trải nghiệm thực hành thiền định của bạn đang ở bậc nào?</p>
                             <label class="radio-option"><input type="radio" name="q6" value="4" required> Hoàn toàn chưa biết gì và chưa bao giờ thử thiền.</label>
                             <label class="radio-option"><input type="radio" name="q6" value="3"> Có tìm hiểu qua sách báo nhưng chưa biết cách thực hành chuẩn chỉnh.</label>
-                            <label class="radio-option"><input type="radio" name="q6" value="2"> Đã từng thử vài lần nhưng chưa thể duy trì đều đặn hàng ngày.</label>
+                            <label class="radio-option"><input type="radio" name="q6" value="2"> Đã tìm hiểu, tập thử vài lần nhưng chưa thể duy trì đều đặn hàng ngày.</label>
                             <label class="radio-option"><input type="radio" name="q6" value="1"> Đang thực hành thiền đều đặn và hiểu rõ lợi ích cốt lõi.</label>
                         </div>
 
@@ -275,7 +281,7 @@
                             <label class="radio-option"><input type="radio" name="q8" value="4" required> Rất khó buông bỏ, giữ lòng thù hận hoặc ấm ức rất lâu trong lòng.</label>
                             <label class="radio-option"><input type="radio" name="q8" value="3"> Mất nhiều tuần hoặc nhiều tháng dằn vặt suy nghĩ mới nguôi ngoai.</label>
                             <label class="radio-option"><input type="radio" name="q8" value="2"> Chỉ giận lúc đó, sau một vài ngày là bình thường hóa mối quan hệ.</label>
-                            <label class="radio-option"><input type="radio" name="q8" value="1"> Thấu cảm sâu sắc, buông bỏ ngay lập tức để giữ bình yên cho chính mình.</label>
+                            <label class="radio-option"><input type="radio" name="q8" value="1"> Thấu cảm sâu sắc, buông bỏ nhanh chóng để giữ bình yên cho chính mình.</label>
                         </div>
 
                         <!-- Q9 -->
@@ -283,17 +289,17 @@
                             <p class="q-title">9. Tần suất bạn cảm thấy trống rỗng, mất phương hướng hoặc chán nản vô cớ là bao nhiêu?</p>
                             <label class="radio-option"><input type="radio" name="q9" value="4" required> Hầu như ngày nào cũng cảm thấy tiêu cực, uể oải vô định.</label>
                             <label class="radio-option"><input type="radio" name="q9" value="3"> Vài lần trong tuần, đặc biệt là khi áp lực công việc tăng cao dồn dập.</label>
-                            <label class="radio-option"><input type="radio" name="q9" value="2"> Hiếm khi xảy ra, chỉ khi có biến cố lớn trong cuộc sống cá nhân.</label>
-                            <label class="radio-option"><input type="radio" name="q9" value="1"> Không bao giờ, luôn tìm thấy niềm vui và ý nghĩa trong từng hành động nhỏ.</label>
+                            <label class="radio-option"><input type="radio" name="q9" value="2"> Ít khi xảy ra, chỉ khi có biến cố gì xảy ra trong cuộc sống cá nhân.</label>
+                            <label class="radio-option"><input type="radio" name="q9" value="1"> Rất hiếm, luôn nhanh chóng quay lại tìm thấy niềm vui và ý nghĩa trong từng hành động nhỏ.</label>
                         </div>
 
                         <!-- Q10 -->
                         <div class="survey-question">
                             <p class="q-title">10. Bạn có dành thời gian kết nối với thiên nhiên (cây cối, đi dạo, nhìn trời mây) không?</p>
-                            <label class="radio-option"><input type="radio" name="q10" value="4" required> Không hề, cả ngày chỉ ở trong phòng kín ôm máy tính và điện thoại.</label>
-                            <label class="radio-option"><input type="radio" name="q10" value="3"> Rất hiếm khi, thỉnh thoảng cuối tuần mới đi cà phê ngoài trời.</label>
-                            <label class="radio-option"><input type="radio" name="q10" value="2"> Thỉnh thoảng có chăm sóc cây cảnh trong nhà hoặc ngắm cảnh ban công.</label>
-                            <label class="radio-option"><input type="radio" name="q10" value="1"> Thường xuyên dành thời gian đi bộ, tưới cây, tận hưởng không khí trong lành.</label>
+                            <label class="radio-option"><input type="radio" name="q10" value="4" required> Rất hiếm khi, cả ngày chỉ ở trong phòng kín ôm máy tính và điện thoại.</label>
+                            <label class="radio-option"><input type="radio" name="q10" value="3"> Rất ít, thỉnh thoảng cuối tuần mới đi ra ngoài chơi, cà phê ngoài trời.</label>
+                            <label class="radio-option"><input type="radio" name="q10" value="2"> Hay ra ngoài trời vài lần mỗi tuần, có chăm sóc cây cảnh trong nhà hoặc ngắm cảnh ban công.</label>
+                            <label class="radio-option"><input type="radio" name="q10" value="1"> Thường xuyên dành thời gian đi bộ, tưới cây, tận hưởng không khí thiên nhiên trong lành.</label>
                         </div>
 
                         <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; font-size: 16px;">📊 Gửi Câu Trả Lời & Xem Kết Quả</button>

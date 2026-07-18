@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thiền Định - Tâm An Trí Sáng v1.1.2.20260716</title>
+    <title>Thiền Định - Tâm An Trí Sáng v1.1.3.20260719</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,7 +57,7 @@
         <section id="tab2" class="tab-content">
             <div class="section-title-wrapper" style="letter-spacing:0.5px">
                 <h2 class="section-title">Không Gian <br>Thiền Định & Hơi Thở</h2>
-                <p class="section-subtitle">Bài thực tập Thiền kết hợp giữa <b>Điều hòa nhịp thở</b> (2 phút đầu) và <b>Thiền định tĩnh lặng</b>. Hãy tùy chỉnh không gian bên dưới phù hợp với bạn để bắt đầu.</p>
+                <p class="section-subtitle">Hãy dành trọn không gian này để trở về với chính mình.<br> Lựa chọn <b>Thiền Tĩnh Lặng</b> để tự điều hòa hơi thở giữa sự tĩnh tại nguyên sơ, hoặc <b>Thiền Theo Chỉ Dẫn</b> để bước vào hành trình tỉnh thức qua những lời dẫn nuôi dưỡng tâm hồn.</p>
             </div>
 
             <div class="practice-dashboard">
@@ -67,18 +67,44 @@
                         Cấu Hình Bài Tập 
                         <div class="tooltip-wrapper">
                             <span class="hint-icon">❓</span>
-                            <div class="tooltip-content">
-                                <b>Cơ chế hoạt động:</b><br><br>
-                                • <b>2 Phút đầu (Luyện thở):</b> Hệ thống sẽ phát âm thanh hướng dẫn nhịp hít-giữ-thở-nghỉ để bạn neo giữ tâm trí, cắt đứt căng thẳng. Mặc định dùng khung 4-4-4-4 giây. Bạn có thể set lại 5-5-5-5 hoặc 6-6-6-6 nếu muốn.<br><br>
-                                • <b>Thời gian còn lại (Thiền định):</b> Có chuông báo chuyển giao. Hệ thống ngừng đếm nhịp, bạn thả lỏng hoàn toàn và thiền trong tĩnh lặng cùng nhạc nền.<br><br>
-                                • Bạn hãy chọn <b>nhạc nền và thời lượng</b> phù hợp cho buổi thiền của mình nhé!
+                            <div class="tooltip-content" style="width: 320px; padding: 18px;">
+                                <div style="font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 10px;">
+                                    Cơ chế hoạt động:
+                                </div>
+                                
+                                <div style="margin-bottom: 14px;">
+                                    <div style="color: #a8e6cf; font-weight: 600; margin-bottom: 6px;">• Thiền Tĩnh Lặng:</div>
+                                    <div style="padding-left: 14px; color: #d1e0d8; font-size: 13px; line-height: 1.6;">
+                                        <span style="color: #fff; font-weight: 600;">2 Phút đầu (Luyện thở):</span> Hệ thống phát âm thanh hướng dẫn nhịp Hít-Giữ-Thở-Nghỉ.<br>
+                                        <span style="color: #fff; font-weight: 600; display: inline-block; margin-top: 4px;">Thời gian còn lại:</span> Hệ thống ngừng đếm nhịp, bạn thả lỏng hoàn toàn và thiền trong tĩnh lặng cùng nhạc nền.
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div style="color: #a8e6cf; font-weight: 600; margin-bottom: 6px;">• Thiền Theo Chỉ Dẫn:</div>
+                                    <div style="padding-left: 14px; color: #d1e0d8; font-size: 13px; line-height: 1.6;">
+                                        Bạn sẽ tập thiền xuyên suốt theo lời dẫn của các chuyên gia. Chỉ cần chọn bài thiền phù hợp, lắng nghe và làm theo hướng dẫn.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </h3>
+
+                    <!-- === THANH CHỌN CHẾ ĐỘ THIỀN === -->
+                    <div style="display: flex; background: #f0f2f1; border-radius: 10px; padding: 4px; margin-bottom: 24px;">
+                        <button id="mode-silent" class="segment-btn active" style="flex: 1; padding: 8px 0; border: none; border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #2c4a3e; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease;">
+                            Thiền Tĩnh Lặng
+                        </button>
+                        <button id="mode-guided" class="segment-btn" style="flex: 1; padding: 8px 0; border: none; border-radius: 8px; background: transparent; color: #888; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease;">
+                            Thiền Theo Chỉ Dẫn
+                        </button>
+                    </div>
                     
-                    <div class="form-group">
-                        <label for="bg-music"><b>🎵 Âm thanh nền:</b></label>
-                        <select id="bg-music">
+                    <!-- === KHU VỰC 1: CÀI ĐẶT THIỀN TĨNH LẶNG (Mặc định hiển thị) === -->
+                    <div id="settings-silent">
+                        <div class="form-group">
+                            <label for="bg-music"><b>🎵 Âm thanh nền:</b></label>
+                            <select id="bg-music">
                             <option value="bgmusic/Calima - Full Moon (freetouse.com).mp3" selected>Full Moon - Calima</option>
                             <option value="bgmusic/Tieng chuong chua.mp3">Tiếng chuông ngân mỗi 30 giây</option>
                             <option value="bgmusic/Tibetan Flute.mp3">Tibetan Flute</option>
@@ -97,36 +123,56 @@
                             <option value="bgmusic/Pufino - Careful (freetouse.com).mp3">Careful - Pufino</option>
                             <option value="bgmusic/Pufino - Harmony (freetouse.com).mp3">Harmony - Pufino</option>
                             <option value="bgmusic/Pufino - Rainy (freetouse.com).mp3">Rainny - Pufino</option>
-                        </select>
-                    </div>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="breath-pace"><span class="zoom-emoji">↔</span> Khung Nhịp Thở (số giây):</label>
-                        <select id="breath-pace">
-                            <option value="4" selected>4 - 4 - 4 - 4 (Chuẩn - Giúp bình ổn)</option>
-                            <option value="5">5 - 5 - 5 - 5 (Thở sâu hơn - Tĩnh tâm)</option>
-                            <option value="6">6 - 6 - 6 - 6 (Chuyên sâu - Thiền sâu)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="practice-duration"><span class="zoom-emoji">⏱</span> Chọn Thời Lượng:</label>
-                        <select id="practice-duration">
+                        <div class="form-group">
+                            <label for="breath-pace"><span class="zoom-emoji">↔</span> Khung Nhịp Thở (số giây):</label>
+                            <select id="breath-pace">
+                                <option value="4" selected>4 - 4 - 4 - 4 (Chuẩn - Giúp bình ổn)</option>
+                                <option value="5">5 - 5 - 5 - 5 (Thở sâu hơn - Tĩnh tâm)</option>
+                                <option value="6">6 - 6 - 6 - 6 (Chuyên sâu - Thiền sâu)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="practice-duration"><span class="zoom-emoji">⏱</span> Chọn Thời Lượng:</label>
+                            <select id="practice-duration">
                             <option value="180">3 Phút (Giảm căng thẳng cấp tốc)</option>
                             <option value="300" selected>5 Phút (Bình ổn tâm trí)</option>
                             <option value="600">10 Phút (Tập trung sâu)</option>
                             <option value="900">15 Phút (Nuôi dưỡng năng lượng)</option>
                             <option value="1200">20 Phút (Thiền định sâu)</option>
                             <option value="1800">30 Phút (Buông thư toàn diện)</option>
-                        </select>
+                            </select>
+                        </div>
+
+                        <div class="form-group checklist-group">
+                            <label><b><span class="zoom-emoji">👇</span> Chuẩn bị trước khi thiền:</b></label>
+                            <ul>
+                                <li>✓ Ngồi thẳng lưng, thả lỏng vai và cơ mặt.</li>
+                                <li>✓ Nhắm mắt lại và hướng sự chú ý vào đầu mũi.</li>
+                                <li>✓ Lắng nghe tín hiệu hướng dẫn nhịp thở phát theo khung 4,5, hoặc 6 giây.</li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div class="form-group checklist-group">
-                        <label><b><span class="zoom-emoji">👇</span> Chuẩn bị trước khi thiền:</b></label>
-                        <ul>
-                            <li>✓ Ngồi thẳng lưng, thả lỏng vai và cơ mặt.</li>
-                            <li>✓ Nhắm mắt lại và hướng sự chú ý vào đầu mũi.</li>
-                            <li>✓ Lắng nghe tín hiệu hướng dẫn nhịp thở phát theo khung 4,5, hoặc 6 giây.</li>
-                        </ul>
+                    <!-- === KHU VỰC 2: CÀI ĐẶT THIỀN HƯỚNG DẪN (Mặc định ẩn) === -->
+                    <div id="settings-guided" style="display: none;">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #2c4a3e; font-size: 14px;">Chọn bài Thiền:</label>
+                            <select id="guided-track-select" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-size: 15px; color: #333; outline: none;">
+                                <!-- Dữ liệu sẽ được Javascript tự động đổ vào đây -->
+                            </select>
+                            
+                            <!-- Hộp thông tin chi tiết bài thiền -->
+                            <div id="guided-track-info" style="margin-top: 12px; padding: 12px; background: #f9fbf9; border-radius: 8px; border: 1px solid #eef2ef;">
+                                <div style="font-size: 16px; color: #2c4a3e; font-weight: 700;" id="guided-info-title">Tên bài thiền</div>
+                                <div style="font-size: 14px; color: #333; margin-top: 4px;" id="guided-info-author">🎙️ Hướng dẫn: --</div>
+                                <div style="font-size: 14px; color: #333; margin-top: 4px;" id="guided-info-duration">⏳ Thời lượng: -- phút</div>
+                                <div style="font-size: 14px; color: #444; margin-top: 8px; font-style: italic;" id="guided-info-desc">Mô tả bài thiền...</div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>

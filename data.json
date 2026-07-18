@@ -334,5 +334,67 @@
       "Hãy thực hành điều này bất cứ lúc nào: khi đang ngồi làm việc, khi đi bộ, hoặc thậm chí lúc đang chờ đèn đỏ. Chỉ cần ba hơi thở có ý thức là đủ để bạn tái lập lại sự bình an và làm chủ hoàn toàn thế giới nội tâm của mình."
     ]
   }
+  ],
+  "guided_meditations": [
+    {
+      "id": "guided_1",
+      "title": "Hướng dẫn Thiền Vipassana tại nhà",
+      "author": "Thầy Minh Niệm",
+      "durationMinutes": 42,
+      "src": "audio/huong dan thien tai nha 42 phut - Thay Minh Niem.mp3",
+      "desc": "Thực hành thiền Vipassana thường xuyên có thể mang lại nhiều lợi ích như giảm căng thẳng, buông bỏ lo âu, thúc đẩy sự linh hoạt của não bộ, nhận thức tỏ tường hơn bản chất của sự vật, sự việc, ứng phó với các tình huống thực tại, giảm bớt hối tiếc quá khứ hay lo lắng tương lai."
+    },
+    {
+      "id": "guided_2",
+      "title": "Thiền buông thư (thiền nằm)",
+      "author": "Thầy Minh Niệm",
+      "durationMinutes": 32,
+      "src": "audio/thien buong thu 32 phut - Thay Minh Niem.mp3",
+      "desc": "Thả lỏng toàn bộ cơ thể, thích hợp để tập lúc nghỉ trưa hoặc trước khi ngủ."
+    },
+    {
+      "id": "guided_3",
+      "title": "Thiền ngủ ngon Yoga Nidra",
+      "author": "breath.vn",
+      "durationMinutes": 37,
+      "src": "audio/thien ngu ngon Yoga Nidra 37 phut - Breath.mp3",
+      "desc": "Yoga Nidra, một phương pháp thiền cổ nổi tiếng với tác dụng chữa mất ngủ và thúc đẩy một giấc ngủ sâu. Thực hành Yoga Nidra giúp đưa cơ thể và tâm trí bạn vào một trạng thái thư giãn sâu gọi là thiền ngủ."
+    },
+    {
+      "id": "guided_4",
+      "title": "Thiền buổi sáng tràn đầy năng lượng tích cực",
+      "author": "breath.vn",
+      "durationMinutes": 11,
+      "src": "audio/thien buoi sang tran day nang luong 11 phut - breath.vn.mp3",
+      "desc": "Những giây phút đầu tiên của buổi sáng là vô cùng quan trọng vì nó quyết định tâm trạng và năng suất làm việc của bạn trong suốt một ngày. Hãy dành ra 11 phút để thanh lọc và ổn định tâm trí, để bạn sẵn sàng bước vào ngày mới với tràn đầy năng lượng và cảm xúc tích cực."
+    },{
+      "id": "guided_5",
+      "title": "Thiền thư giãn",
+      "author": "Sách nói Fonos",
+      "durationMinutes": 14,
+      "src": "audio/thien thu gian 14 phut - Fonos.mp3",
+      "desc": "Bộ não của con người chưa bao giờ được thiết kế để xử lý một lượng thông tin khổng lồ và liên tục như hiện nay. Hãy dành tặng cho cơ thể mình, tâm trí mình một khoảng lặng, những giây phút được nghỉ ngơi, được thanh lọc, được tưới mát bằng hơi thở chánh niệm, bằng dòng chảy tỉnh thức với từng khoảnh khắc hiện tại."
+    },{
+      "id": "guided_6",
+      "title": "Thiền tâm trí nhẹ nhàng buông bỏ phiền lo",
+      "author": "breath.vn",
+      "durationMinutes": 21,
+      "src": "audio/thien tam tri nhe nhang buong bo phien lo 21 phut  - Breath.mp3",
+      "desc": "Bản chất của vạn vật trên thế gian này là vô thường. Niềm vui, nỗi buồn, danh vọng, tiền tài hay sức khỏe đều đến rồi đi theo quy luật nhân duyên. Đau khổ sinh ra khi chúng ta cố gắng níu giữ những thứ đang trên đà thay đổi. Giữ một tâm thế cởi mở, không bám chấp giúp bạn đứng vững và mỉm cười trước mọi thăng trầm của cuộc đời. Khi bạn biết buông bỏ, bạn sẽ có được một sự tự do tuyệt đối. Tâm bạn sẽ trở nên rộng lớn như bầu trời, mặc cho những đám mây khen chê, được mất bay qua mà không để lại bất kỳ tỳ vết nào"
+    },{
+      "id": "guided_7",
+      "title": "Thiền biết ơn cơ thể",
+      "author": "Lưu Thanh Thủy",
+      "durationMinutes": 12,
+      "src": "audio/thien biet on co the 12 phut - Luu Thanh Thuy.mp3",
+      "desc": "Quét cơ thể (Body scan) để kết nối và tri ân từng bộ phận cơ thể, đã vận hành từng phút từng giây cho ta sự sống, cho ta trải nghiệm, cảm nhận, cho ta được làm mọi điều ta mong muốn."
+    },{
+      "id": "guided_8",
+      "title": "Thiền lòng biết ơn",
+      "author": "youtube",
+      "durationMinutes": 7,
+      "src": "audio/thien long biet on 7 phut - youtube.mp3",
+      "desc": "Thả lỏng toàn bộ cơ thể, thích hợp để tập lúc nghỉ trưa hoặc trước khi ngủ."
+    }
   ]
 }

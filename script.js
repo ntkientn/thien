@@ -142,6 +142,7 @@ async function fetchSiteData() {
         // Initial random selection
         loadRandomQuote();
         loadRandomArticle();
+        renderGuidedTrackOptions();
     } catch (error) {
         console.error("Error loading data.json file asset:", error);
     }
@@ -244,9 +245,128 @@ function switchTab(tabIndex) {
 /* ==========================================================================
    TAB 2: BOX BREATHING ENGINE WITH AUDIO BACKGROUND & DYNAMIC PACE
    ========================================================================== */
+// === LOGIC CHUYỂN ĐỔI CHẾ ĐỘ THIỀN (TĨNH LẶNG <-> HƯỚNG DẪN) ===
+document.addEventListener("DOMContentLoaded", () => {
+    const modeSilentBtn = document.getElementById('mode-silent');
+    const modeGuidedBtn = document.getElementById('mode-guided');
+    const settingsSilent = document.getElementById('settings-silent');
+    const settingsGuided = document.getElementById('settings-guided');
+    const pacingBars = document.getElementById("pacing-bars-container");
+    const audioHint = document.getElementById("audio-hint");
+    const circleText = document.getElementById("circle-text-label");
+
+    if (modeSilentBtn && modeGuidedBtn) {
+        // --- KHI CHỌN THIỀN TĨNH LẶNG ---
+        modeSilentBtn.addEventListener('click', () => {
+            if (isPracticing) return; // Khóa không cho đổi khi đang thiền
+
+            modeSilentBtn.classList.add('active');
+            modeSilentBtn.style.background = '#fff';
+            modeSilentBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            modeSilentBtn.style.color = '#2c4a3e';
+
+            modeGuidedBtn.classList.remove('active');
+            modeGuidedBtn.style.background = 'transparent';
+            modeGuidedBtn.style.boxShadow = 'none';
+            modeGuidedBtn.style.color = '#888';
+
+            settingsSilent.style.display = 'block';
+            settingsGuided.style.display = 'none';
+
+            // PHỤC HỒI UI BÊN PHẢI
+            if (pacingBars) pacingBars.style.display = "grid"; // Hiện lại thanh thở
+            if (audioHint) audioHint.style.display = "block"; // Hiện lại lưu ý
+            if (circleText) circleText.innerText = "Hơi thở";
+
+            // Lấy lại số phút của thẻ chọn Thời lượng để đắp lên đồng hồ
+            const durationSelect = document.getElementById("practice-duration");
+            if (durationSelect) updateTimerDisplay(parseInt(durationSelect.value));
+        });
+
+        // --- KHI CHỌN THIỀN CHỈ DẪN ---
+        modeGuidedBtn.addEventListener('click', () => {
+            if (isPracticing) return; // Khóa không cho đổi khi đang thiền
+
+            modeGuidedBtn.classList.add('active');
+            modeGuidedBtn.style.background = '#fff';
+            modeGuidedBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            modeGuidedBtn.style.color = '#2c4a3e';
+
+            modeSilentBtn.classList.remove('active');
+            modeSilentBtn.style.background = 'transparent';
+            modeSilentBtn.style.boxShadow = 'none';
+            modeSilentBtn.style.color = '#888';
+
+            settingsGuided.style.display = 'block';
+            settingsSilent.style.display = 'none';
+
+            // DỌN DẸP UI BÊN PHẢI (CHUẨN BỊ CHO THIỀN CHỈ DẪN)
+            if (pacingBars) pacingBars.style.display = "none"; // Ẩn hoàn toàn thanh thở
+            if (audioHint) audioHint.style.display = "none"; // Ẩn lưu ý
+            if (circleText) circleText.innerText = "Tâm An";
+
+            // Lấy số phút của bài MP3 đang chọn đắp lên đồng hồ
+            const trackSelect = document.getElementById("guided-track-select");
+            if (siteData && siteData.guided_meditations && trackSelect) {
+                const track = siteData.guided_meditations[trackSelect.value];
+                if (track) updateTimerDisplay(track.durationMinutes * 60);
+            }
+        });
+    }
+});
+
 function initAudioContext() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+// Hàm tạo danh sách <option> cho thẻ Select
+function renderGuidedTrackOptions() {
+    if (!siteData || !siteData.guided_meditations) return;
+    
+    const select = document.getElementById("guided-track-select");
+    if (!select) return;
+    
+    let html = "";
+    siteData.guided_meditations.forEach((track, index) => {
+        // Nới rộng giới hạn ký tự vì đã bỏ phần tên tác giả
+        const MAX_LENGTH = 45; 
+        let shortTitle = track.title;
+        if (shortTitle.length > MAX_LENGTH) {
+            shortTitle = shortTitle.substring(0, MAX_LENGTH).trim() + "...";
+        }
+
+        // Cập nhật format mới: Chỉ hiện <Title> (<Duration>)
+        html += `<option value="${index}">${shortTitle} - ${track.durationMinutes} phút</option>`;
+    });
+    select.innerHTML = html;
+    
+    // Khởi tạo hiển thị thông tin cho bài đầu tiên
+    updateGuidedTrackInfo(0);
+    
+    // Lắng nghe mỗi khi user chọn bài khác thì đổi thông tin bên dưới
+    select.addEventListener("change", (e) => {
+        updateGuidedTrackInfo(e.target.value);
+    });
+}
+
+// Hàm cập nhật chữ trong khối thông tin Bài thiền
+function updateGuidedTrackInfo(index) {
+    if (!siteData || !siteData.guided_meditations) return;
+    const track = siteData.guided_meditations[index];
+    if (!track) return;
+    
+    document.getElementById("guided-info-title").innerText = track.title;
+    document.getElementById("guided-info-author").innerText = `🎙️ Hướng dẫn: ${track.author}`;
+    document.getElementById("guided-info-duration").innerText = `⏳ Thời lượng: ${track.durationMinutes} phút`;
+    document.getElementById("guided-info-desc").innerText = track.desc;
+
+    // Kích hoạt đổi số phút trên mặt đồng hồ lớn
+    const modeGuidedBtn = document.getElementById('mode-guided');
+    // Chỉ nhảy đồng hồ nếu chưa bấm Bắt đầu VÀ đang đứng ở chế độ Thiền Chỉ Dẫn
+    if (!isPracticing && modeGuidedBtn && modeGuidedBtn.classList.contains('active')) {
+        updateTimerDisplay(track.durationMinutes * 60);
     }
 }
 
@@ -276,6 +396,7 @@ function playPhaseSound(frequency, duration, type = 'sine') {
 
 // Thêm biến global để theo dõi thời gian đã trôi qua
 let elapsedTime = 0; 
+let actualCompletedMinutes = 0; // THÊM DÒNG NÀY: Lưu số phút thực tế đã hoàn thành
 const BREATHING_DURATION = 120; // 2 phút (120 giây)
 
 function togglePractice() {
@@ -283,96 +404,163 @@ function togglePractice() {
     const startBtn = document.getElementById("btn-start-practice");
     const durationSelect = document.getElementById("practice-duration");
     const paceSelect = document.getElementById("breath-pace");
-    const audioSelect = document.getElementById("bg-music"); 
+    const audioSelect = document.getElementById("bg-music");
     const bgPlayer = document.getElementById("audio-bg-player");
-    
+
     const phaseBadge = document.getElementById("phase-indicator");
     const pacingBars = document.getElementById("pacing-bars-container");
     const audioHint = document.getElementById("audio-hint");
+    const trackSelect = document.getElementById("guided-track-select");
+
+    // KIỂM TRA XEM NGƯỜI DÙNG ĐANG Ở TAB NÀO
+    const modeGuidedBtn = document.getElementById('mode-guided');
+    const isGuidedMode = modeGuidedBtn && modeGuidedBtn.classList.contains('active');
 
     if (isPracticing) {
-        // --- STOP MECHANISM ---
+        // ==========================================
+        // CƠ CHẾ DỪNG THIỀN (DÙNG CHUNG CHO CẢ 2 CHẾ ĐỘ)
+        // ==========================================
         clearInterval(breatheInterval);
         clearInterval(totalTimerInterval);
         isPracticing = false;
-        
-        // Tắt voice nếu đang đọc dở
+
+        // --- BƯỚC 4: TÍNH TOÁN THỜI GIAN THỰC TẾ ---
+        actualCompletedMinutes = Math.floor(elapsedTime / 60);
+        const isFinishedNaturally = (totalTimeRemaining <= 0);
+
         voiceStart.pause(); voiceStart.currentTime = 0;
         voiceTransition.pause(); voiceTransition.currentTime = 0;
         voiceEnd.pause(); voiceEnd.currentTime = 0;
-        
+
         startBtn.innerText = "🧘 Bắt Đầu Thiền";
         startBtn.classList.remove("active-stop");
-        
+
         resetBreathingVisuals();
-        // Khôi phục lại mặt đồng hồ theo đúng option đang chọn
-        updateTimerDisplay(parseInt(durationSelect.value));
+
+        // Khôi phục lại mặt đồng hồ tùy theo chế độ
+        if (isGuidedMode && trackSelect && siteData) {
+            const track = siteData.guided_meditations[trackSelect.value];
+            updateTimerDisplay(track.durationMinutes * 60);
+        } else {
+            updateTimerDisplay(parseInt(durationSelect.value));
+        }
 
         phaseBadge.classList.add("hidden");
         pacingBars.classList.remove("fade-out");
         audioHint.classList.remove("fade-out");
         document.getElementById("circle-text-label").innerText = "Hơi thở";
-        
+
+        // Mở khóa lại các nút chọn
         if(paceSelect) paceSelect.disabled = false;
         if(durationSelect) durationSelect.disabled = false;
+        if(trackSelect) trackSelect.disabled = false;
 
         if (bgPlayer) {
             bgPlayer.pause();
-            bgPlayer.currentTime = 0; 
+            bgPlayer.currentTime = 0;
+        }
+
+        // --- BƯỚC 4: KÍCH HOẠT MODAL NẾU DỪNG SỚM (> 2 PHÚT) ---
+        if (!isFinishedNaturally && elapsedTime >= 120) {
+            // Đợi 0.5s cho UI kịp dọn dẹp rồi mới hiện bảng chúc mừng
+            setTimeout(() => { showCompletionModal(); }, 500);
         }
     } else {
-        // --- START MECHANISM ---
+        // ==========================================
+        // CƠ CHẾ BẮT ĐẦU
+        // ==========================================
         isPracticing = true;
-        elapsedTime = 0; 
-        
+        elapsedTime = 0;
+
         startBtn.innerText = "🛑 Dừng lại";
         startBtn.classList.add("active-stop");
-        
-        phaseBadge.classList.remove("hidden");
-        phaseBadge.innerText = "Giai đoạn 1: Luyện Thở (2 Phút)";
 
+        // Khóa các nút chọn để không bị lỗi click nhầm lúc đang thiền
         if(paceSelect) paceSelect.disabled = true;
         if(durationSelect) durationSelect.disabled = true;
+        if(trackSelect) trackSelect.disabled = true;
 
-        const chosenPace = parseInt(paceSelect.value) || 4;
-        const totalCycleSeconds = chosenPace * 4; 
+        // PHÂN LUỒNG LOGIC: TĨNH LẶNG HAY HƯỚNG DẪN?
+        if (isGuidedMode && trackSelect && siteData) {
+            // --- NGÃ RẼ 1: THIỀN THEO HƯỚNG DẪN (GUIDED) ---
+            const track = siteData.guided_meditations[trackSelect.value];
+            totalTimeRemaining = track.durationMinutes * 60;
+            updateTimerDisplay(totalTimeRemaining);
 
-        totalTimeRemaining = parseInt(durationSelect.value);
-        updateTimerDisplay(totalTimeRemaining);
+            phaseBadge.classList.remove("hidden");
+            phaseBadge.innerText = `🎧 Đang phát: ${track.title}`;
 
-        if (bgPlayer && audioSelect && audioSelect.value !== "nature") {
-            bgPlayer.src = audioSelect.value;
-            bgPlayer.volume = 0.8;
-            bgPlayer.loop = true;
-            bgPlayer.play().catch(err => console.log("Audio play blocked:", err));
-        }
+            document.getElementById("breath-status").innerHTML = "<br><b>Hãy nhắm mắt và thả lỏng...</b>";
+            document.getElementById("circle-text-label").innerText = "Tâm An";
 
-        // Đổi trạng thái UI báo hiệu đang chờ
-        document.getElementById("breath-status").innerHTML = "<br><b>Đang lắng nghe hướng dẫn...</b>";
+            // Chuyển hình tròn sang trạng thái mờ dịu
+            const node = document.getElementById("breath-node");
+            node.className = "breathing-circle zen-static";
 
-        // 1. Gõ chuông
-        playPhaseSound(432, 2.5, 'sine');
-        
-        // 2. Chờ 2 giây để chuông ngân, rồi phát Voice
-        setTimeout(() => {
-            if (!isPracticing) return; // Nếu user lỡ bấm Dừng lúc đang đợi chuông
-            
-            voiceStart.currentTime = 0;
-            let playPromise = voiceStart.play();
+            // Ẩn thanh nhịp thở và câu nhắc nhở
+            pacingBars.classList.add("fade-out");
+            audioHint.classList.add("fade-out");
 
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    // 3. Audio phát thành công -> Đợi khi nào đọc xong (onended) mới chạy nhịp thở
-                    voiceStart.onended = () => {
-                        if (isPracticing) startBreathingEngine(chosenPace, totalCycleSeconds);
-                    };
-                }).catch(error => {
-                    // Nếu lỗi (ví dụ chưa có file mp3), hệ thống tự động bỏ qua voice và chạy đếm nhịp luôn
-                    console.log("Bỏ qua Voice, chạy thẳng đếm nhịp");
-                    if (isPracticing) startBreathingEngine(chosenPace, totalCycleSeconds);
-                });
+            // Nạp file MP3 và phát
+            if (bgPlayer) {
+                bgPlayer.src = track.src;
+                bgPlayer.volume = 1.0;
+                bgPlayer.loop = false; // Phát 1 lần, không lặp lại
+                bgPlayer.play().catch(err => console.log("Audio play blocked:", err));
             }
-        }, 2000);
+
+            // Chạy đồng hồ đếm ngược trực tiếp
+            totalTimerInterval = setInterval(() => {
+                totalTimeRemaining--;
+                elapsedTime++; // Biến này sẽ dùng cho Bước 4 (chốt thời gian thực tế)
+                updateTimerDisplay(totalTimeRemaining);
+
+                if (totalTimeRemaining <= 0) {
+                    togglePractice();
+                    playPhaseSound(528, 2.5, 'sine'); // Báo chuông kết thúc nhẹ nhàng
+                    setTimeout(() => { showCompletionModal(); }, 3000);
+                }
+            }, 1000);
+
+        } else {
+            // --- NGÃ RẼ 2: THIỀN TĨNH LẶNG (SILENT - CODE CŨ CỦA ANH) ---
+            const chosenPace = parseInt(paceSelect.value) || 4;
+            const totalCycleSeconds = chosenPace * 4;
+
+            totalTimeRemaining = parseInt(durationSelect.value);
+            updateTimerDisplay(totalTimeRemaining);
+
+            phaseBadge.classList.remove("hidden");
+            phaseBadge.innerText = "Giai đoạn 1: Luyện Thở (2 Phút)";
+
+            if (bgPlayer && audioSelect && audioSelect.value !== "nature") {
+                bgPlayer.src = audioSelect.value;
+                bgPlayer.volume = 0.8;
+                bgPlayer.loop = true;
+                bgPlayer.play().catch(err => console.log("Audio play blocked:", err));
+            }
+
+            document.getElementById("breath-status").innerHTML = "<br><b>Đang lắng nghe hướng dẫn...</b>";
+
+            playPhaseSound(432, 2.5, 'sine');
+            setTimeout(() => {
+                if (!isPracticing) return;
+
+                voiceStart.currentTime = 0;
+                let playPromise = voiceStart.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        voiceStart.onended = () => {
+                            if (isPracticing) startBreathingEngine(chosenPace, totalCycleSeconds);
+                        };
+                    }).catch(error => {
+                        console.log("Bỏ qua Voice, chạy thẳng đếm nhịp");
+                        if (isPracticing) startBreathingEngine(chosenPace, totalCycleSeconds);
+                    });
+                }
+            }, 2000);
+        }
     }
 }
 
@@ -567,6 +755,31 @@ document.getElementById('btn-skip-modal').addEventListener('click', () => {
     setTimeout(() => { window.location.reload(); }, 300);
 });
 
+// ==========================================
+// AUTO-SAVE: LƯU NGẦM KHI USER TẮT TRANG ĐỘT NGỘT
+// ==========================================
+window.addEventListener('beforeunload', (event) => {
+    // Chỉ kích hoạt lưu ngầm nếu đang thiền và thời gian đã lớn hơn hoặc bằng 2 phút (120s)
+    if (isPracticing && elapsedTime >= 120) {
+        let practiceHistory = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+        
+        let autoCompletedMinutes = Math.floor(elapsedTime / 60);
+        let finalDuration = (autoCompletedMinutes >= 2) ? autoCompletedMinutes : 2;
+        
+        const now = new Date();
+        const record = {
+            id: now.getTime(), 
+            isoDate: now.toISOString(), 
+            displayDate: `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} - ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
+            duration: finalDuration,
+            benefits: ["Bài Thiền dừng lại sớm (hệ thống lưu tự động)"] // Đánh dấu đây là record do hệ thống tự cứu
+        };
+        
+        practiceHistory.push(record);
+        localStorage.setItem('zenPracticeHistory', JSON.stringify(practiceHistory));
+    }
+});
+
 // Hàm lưu trữ data vào Local Storage
 function saveMeditationSession(benefits) {
     let practiceHistory = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
@@ -579,16 +792,17 @@ function saveMeditationSession(benefits) {
         }
         editingRecordId = null; // Reset lại trạng thái
     } else {
-        // TRƯỜNG HỢP 2: LƯU RECORD MỚI
-        const durationSelect = document.getElementById("practice-duration");
-        const durationValue = durationSelect ? durationSelect.options[durationSelect.selectedIndex].text.split(' ')[0] : "0";
-        
+        // TRƯỜNG HỢP 2: LƯU RECORD MỚI VỚI SỐ PHÚT THỰC TẾ
         const now = new Date();
+        
+        // Đảm bảo số phút tối thiểu là 2 (vì đã lọt được vào hàm này là phải >= 120s)
+        let finalDuration = (actualCompletedMinutes >= 2) ? actualCompletedMinutes : 2;
+        
         const record = {
-            id: now.getTime(), // ID duy nhất
-            isoDate: now.toISOString(), // Chuẩn DateTime để thống kê sau này
+            id: now.getTime(), 
+            isoDate: now.toISOString(), 
             displayDate: `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} - ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
-            duration: parseInt(durationValue),
+            duration: finalDuration,
             benefits: benefits
         };
         practiceHistory.push(record);
@@ -596,7 +810,7 @@ function saveMeditationSession(benefits) {
     
     localStorage.setItem('zenPracticeHistory', JSON.stringify(practiceHistory));
     
-    // Refresh lại giao diện
+    // Refresh lại giao diện lịch sử
     renderPracticeHistory();
 }
 

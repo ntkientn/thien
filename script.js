@@ -1029,21 +1029,92 @@ function openEditModal(recordId) {
     modal.classList.remove('hidden');
 }
 
+// Hàm tự động tạo mã ảnh SVG cho các Huy hiệu
+// Hàm tự động tạo mã ảnh SVG cho các Huy hiệu theo từng mốc tiến hóa
+function generateBadgeSVG(milestone) {
+    let colorStart, colorEnd, textSize, textLabel, bgShape, textY;
+
+    // Path chuẩn của 1 ngôi sao 5 cánh (Dùng chung để dễ quản lý)
+    const starPath = "M0 -6 L1.5 -1.5 L6 -1.5 L2.5 1 L4 6 L0 3.5 L-4 6 L-2.5 1 L-6 -1.5 L-1.5 -1.5 Z";
+
+    if (milestone === 0) {
+        // CẤP 0: HẠT GIỐNG (Giữ nguyên hình hạt mầm mộc mạc)
+        colorStart = "#d4ccb8"; colorEnd = "#8c7662";
+        textLabel = "SEED"; textSize = "14"; textY = "34.5"; // Chữ nằm chính giữa
+        bgShape = `<path d="M32 20 C 40 30 42 42 32 48 C 22 42 24 30 32 20 Z" fill="#ffffff" opacity="0.4"/>`;
+        
+    } else if (milestone <= 5) {
+        // CẤP 1 (1h, 2h, 5h): 1 SAO TO (Nổi bật)
+        colorStart = "#a8e6cf"; colorEnd = "#3b7b54";
+        textLabel = milestone + "h"; textSize = "18"; textY = "38"; // Chữ hạ thấp xuống để nhường chỗ cho sao
+        bgShape = `<g transform="translate(32, 16) scale(1.3)"><path d="${starPath}" fill="#ffffff" opacity="0.8"/></g>`;
+        
+    } else if (milestone <= 50) {
+        // CẤP 2 (10h, 20h, 50h): 2 SAO CÂN XỨNG
+        colorStart = "#89cff0"; colorEnd = "#2980b9";
+        textLabel = milestone + "h"; textSize = "18"; textY = "38";
+        bgShape = `
+            <g fill="#ffffff" opacity="0.8">
+                <g transform="translate(22, 16) scale(1.1)"><path d="${starPath}"/></g>
+                <g transform="translate(42, 16) scale(1.1)"><path d="${starPath}"/></g>
+            </g>`;
+            
+    } else if (milestone <= 500) {
+        // CẤP 3 (100h, 200h, 500h): 3 SAO (Đội hình vương miện)
+        colorStart = "#f6d365"; colorEnd = "#fda085";
+        textLabel = milestone + "h"; textSize = "18"; textY = "38";
+        bgShape = `
+            <g fill="#ffffff" opacity="0.8">
+                <g transform="translate(32, 11) scale(1.1)"><path d="${starPath}"/></g>
+                <g transform="translate(18, 17) scale(0.9)"><path d="${starPath}"/></g>
+                <g transform="translate(46, 17) scale(0.9)"><path d="${starPath}"/></g>
+            </g>`;
+            
+    } else {
+        // CẤP 4 (1000h+): KHAI SÁNG TÂM TRÍ (Họa tiết Vũ trụ siêu cấp)
+        colorStart = "#8E54E9"; colorEnd = "#4776E6";
+        textLabel = milestone + "h"; textSize = "14"; textY = "34.5"; // Chữ về lại chính giữa
+        bgShape = `
+            <g opacity="0.6">
+                <path d="M32 4 L36 24 L56 28 L38 36 L44 56 L32 42 L20 56 L26 36 L8 28 L28 24 Z" fill="#ffffff"/>
+                <circle cx="32" cy="32" r="16" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+                <circle cx="32" cy="32" r="22" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="2 3"/>
+            </g>`;
+    }
+
+    return `
+    <svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="grad${milestone}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="${colorStart}" />
+                <stop offset="100%" stop-color="${colorEnd}" />
+            </linearGradient>
+            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+            </filter>
+        </defs>
+        
+        <circle cx="32" cy="32" r="30" fill="url(#grad${milestone})" filter="url(#shadow)"/>
+        
+        <!-- Họa tiết (thay đổi theo cấp độ) -->
+        ${bgShape}
+        
+        <text x="32" y="${textY}" font-family="system-ui, sans-serif" font-size="${textSize}" font-weight="800" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">${textLabel}</text>
+    </svg>`;
+}
+
 function renderDashboard() {
     const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
     if (history.length === 0) return;
 
     let totalMinutes = 0;
-    let totalSessions = history.length;
     let currentMonthDays = new Set();
-    let timeBlocks = { "Sáng (5h-12h)": 0, "Chiều (12h-18h)": 0, "Tối (18h-23h)": 0, "Đêm (23h-5h)": 0 };
-    let benefitCounts = {};
-    let weekStarts = new Set(); // Dùng để tính Week Streak
-
+    let weekStarts = new Set(); 
+    
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
-    // Hàm phụ trợ: Lấy ngày Thứ Hai của tuần chứa ngày d
+    // 1. Lọc data cơ bản
     function getMonday(d) {
         let date = new Date(d);
         let day = date.getDay();
@@ -1055,97 +1126,236 @@ function renderDashboard() {
         totalMinutes += parseInt(record.duration) || 0;
         const dateObj = new Date(record.isoDate || record.timestamp);
 
-        // Đếm ngày trong tháng
         if (dateObj.getMonth() === currentMonth && dateObj.getFullYear() === currentYear) {
             currentMonthDays.add(dateObj.getDate());
         }
-
-        // Đếm khung giờ
-        const hour = dateObj.getHours();
-        if (hour >= 5 && hour < 12) timeBlocks["Sáng (5h-12h)"]++;
-        else if (hour >= 12 && hour < 18) timeBlocks["Chiều (12h-18h)"]++;
-        else if (hour >= 18 && hour < 23) timeBlocks["Tối (18h-23h)"]++;
-        else timeBlocks["Đêm (23h-5h)"]++;
-
-        // Đếm lợi ích
-        if (record.benefits && record.benefits.length > 0) {
-            record.benefits.forEach(b => {
-                benefitCounts[b] = (benefitCounts[b] || 0) + 1;
-            });
-        }
-
-        // Lưu lại Thứ Hai của tuần user có tập
         weekStarts.add(getMonday(dateObj));
     });
 
-    // --- TÍNH TOÁN CHUỖI TUẦN (WEEK STREAK) ---
-    let sortedWeeks = Array.from(weekStarts).sort((a, b) => b - a); // Sắp xếp tuần từ mới nhất -> cũ nhất
-    let streak = 0;
-    let currentMonday = getMonday(new Date());
-    let lastMonday = currentMonday - (7 * 24 * 60 * 60 * 1000); // Trừ đi 7 ngày
+    // =====================================
+    // BOX 1: TỔNG GIỜ & HUY HIỆU (ENGLISH SVG)
+    // =====================================
+    const totalHours = totalMinutes / 60;
+    const MILESTONES = [0, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
+    
+    let currentMilestone = 0;
+    let nextMilestone = 1;
+    
+    for (let i = 0; i < MILESTONES.length; i++) {
+        if (totalHours >= MILESTONES[i]) {
+            currentMilestone = MILESTONES[i];
+            nextMilestone = MILESTONES[i+1] || MILESTONES[i]; 
+        } else {
+            break;
+        }
+    }
+    // === CHÈN TẠM DÒNG NÀY ĐỂ TEST UI (Xóa đi khi test xong) ===
+    //currentMilestone = 5000; // Thử đổi số này thành 1, 5, 20, 100 để xem các màu
+    // ============================================================
+    let progressPercent = (totalHours / nextMilestone) * 100;
+    if (progressPercent > 100) progressPercent = 100;
+
+    // Render Box 1 (Đổ mã SVG vào thẻ thay vì ghi Text)
+    document.getElementById('dash-total-val').innerText = totalMinutes; 
+    document.getElementById('dash-current-badge').innerHTML = generateBadgeSVG(currentMilestone);
+    
+    document.getElementById('dash-progress-fill').style.width = progressPercent + "%";
+    document.getElementById('dash-prog-start').innerText = (totalHours).toFixed(1) + "h";
+    document.getElementById('dash-prog-end').innerText = nextMilestone + "h";
+
+    // =====================================
+    // BOX 2: MẠCH DUY TRÌ (WEEKLY STREAKS)
+    // =====================================
+    let sortedWeeks = Array.from(weekStarts).sort((a, b) => b - a); // Từ mới -> cũ
+    
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempLongest = 0;
+
+    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+    const thisMonday = getMonday(new Date());
+    const lastMonday = thisMonday - ONE_WEEK;
 
     if (sortedWeeks.length > 0) {
-        // Nếu user có tập trong tuần này HOẶC tuần trước, bắt đầu đếm streak = 1
-        if (sortedWeeks[0] === currentMonday || sortedWeeks[0] === lastMonday) {
-            streak = 1;
+        // --- Tính Current Streak ---
+        if (sortedWeeks[0] === thisMonday || sortedWeeks[0] === lastMonday) {
+            currentStreak = 1;
             let checkMonday = sortedWeeks[0];
-            // Đếm ngược về quá khứ xem các tuần có liền nhau (cách nhau đúng 7 ngày) không
             for (let i = 1; i < sortedWeeks.length; i++) {
-                if (checkMonday - sortedWeeks[i] === (7 * 24 * 60 * 60 * 1000)) {
-                    streak++;
+                if (checkMonday - sortedWeeks[i] === ONE_WEEK) {
+                    currentStreak++;
                     checkMonday = sortedWeeks[i];
                 } else {
                     break;
                 }
             }
         }
-    }
 
-    // --- TÌM KHUNG GIỜ VÀ TOP 3 LỢI ÍCH ---
-    let favoriteTime = "--";
-    let maxTimeCount = 0;
-    for (const [time, count] of Object.entries(timeBlocks)) {
-        if (count > maxTimeCount) {
-            maxTimeCount = count;
-            favoriteTime = time;
+        // --- Tính Longest Streak ---
+        tempLongest = 1;
+        longestStreak = 1;
+        for (let i = 0; i < sortedWeeks.length - 1; i++) {
+            if (sortedWeeks[i] - sortedWeeks[i+1] === ONE_WEEK) {
+                tempLongest++;
+                if (tempLongest > longestStreak) longestStreak = tempLongest;
+            } else {
+                tempLongest = 1; // Reset nếu đứt mạch
+            }
         }
     }
 
-    // Sắp xếp object benefit theo value giảm dần và lấy ra Top 3
-    let sortedBenefits = Object.entries(benefitCounts).sort((a, b) => b[1] - a[1]);
-    let top3Benefits = sortedBenefits.slice(0, 3);
+    // Render BOX 2
+    document.getElementById('dash-current-streak').innerText = currentStreak;
+    document.getElementById('dash-longest-streak').innerText = longestStreak;
+
+    // Placeholder cho BOX 3 (Tháng này)
+    // Khởi tạo Lưới Lịch Tích Lũy
+    initMonthlyCalendar(history);
+
+    // =====================================
+    // BOX 4: KHUNG GIỜ QUEN THUỘC (TIME DISTRIBUTION)
+    // =====================================
+    let hourlyCounts = new Array(24).fill(0);
     
-    let benefitsHtml = '';
-    if (top3Benefits.length > 0) {
-        top3Benefits.forEach(item => {
-            const benefitName = item[0];
-            
-            // Tra cứu nhóm của benefit này từ Config gốc (ví dụ: 'emotional', 'physical', 'core')
-            const groupName = BENEFIT_COLOR_MAP[benefitName] || 'empty';
-            
-            // Gắn chung class 'history-chip' và 'chip-[tên-nhóm]' để dùng chung CSS với Lịch sử
-            benefitsHtml += `<span class="history-chip chip-${groupName}" style="padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 500; display: inline-block;">${benefitName}</span>`;
-        });
-    } else {
-        benefitsHtml = `<span style="color: #999; font-size: 13px;">Chưa có dữ liệu</span>`;
+    history.forEach(record => {
+        const dateObj = new Date(record.isoDate || record.timestamp);
+        const hour = dateObj.getHours(); // Lấy trực tiếp giờ từ 0 đến 23
+        hourlyCounts[hour]++;
+    });
+
+    // 1. Tìm Max để tính chiều cao tỷ lệ % cho cột biểu đồ
+    const maxCount = Math.max(...hourlyCounts, 1); 
+
+    // 2. Tìm Top 3 khung giờ có số lần tập cao nhất
+    let topHoursList = [];
+    for (let i = 0; i < 24; i++) {
+        if (hourlyCounts[i] > 0) {
+            topHoursList.push({ hour: i, count: hourlyCounts[i] });
+        }
+    }
+    // Sắp xếp giảm dần theo số lần tập
+    topHoursList.sort((a, b) => b.count - a.count);
+    let top3 = topHoursList.slice(0, 3).map(item => item.hour);
+
+    // 3. Hiển thị text Top 3 (Thêm số 0 ở trước nếu giờ < 10)
+    const topHoursText = top3.length > 0 
+        ? top3.map(h => `${String(h).padStart(2, '0')}:00`).join(' • ')
+        : "--:--";
+    document.getElementById('dash-top-hours').innerText = topHoursText;
+
+    // 4. Vẽ 24 cột biểu đồ
+    let chartHtml = '';
+    for (let i = 0; i < 24; i++) {
+        const count = hourlyCounts[i];
+        const heightPercent = (count / maxCount) * 100;
+        const isTopHour = top3.includes(i) ? 'top-hour' : '';
+        const timeLabel = `${String(i).padStart(2, '0')}:00`;
+        
+        chartHtml += `
+            <div class="chart-bar-wrapper">
+                <div class="chart-tooltip">${timeLabel} - ${count} lần</div>
+                <div class="chart-bar ${isTopHour}" style="height: ${heightPercent > 0 ? heightPercent : 3}%"></div>
+            </div>
+        `;
+    }
+    document.getElementById('hourly-chart-container').innerHTML = chartHtml;
+}
+
+// ==========================================
+// TÍNH NĂNG VẼ LỊCH TÍCH LŨY (MINI CALENDAR)
+// ==========================================
+// ==========================================
+// TÍNH NĂNG VẼ LỊCH TÍCH LŨY (MINI CALENDAR)
+// ==========================================
+function initMonthlyCalendar(history) {
+    const filter = document.getElementById('dash-month-filter');
+    
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    // Gán giá trị mặc định là tháng hiện tại (Format bắt buộc của thẻ là YYYY-MM)
+    const formattedMonth = String(currentMonth + 1).padStart(2, '0');
+    filter.value = `${currentYear}-${formattedMonth}`;
+    
+    // Vẽ lịch tháng hiện tại ở lần tải đầu tiên
+    renderMiniCalendar(currentMonth, currentYear, history);
+
+    // Lắng nghe sự kiện khi người dùng tự do chọn tháng/năm bất kỳ
+    filter.addEventListener('change', (e) => {
+        if (!e.target.value) return; // Đề phòng user nhấn nút Clear xóa trắng dữ liệu
+        
+        // Dữ liệu trả về luôn có dạng "YYYY-MM" (VD: "2026-07")
+        const [y, m] = e.target.value.split('-').map(Number);
+        
+        // Truyền vào hàm render (trừ m đi 1 vì Date Object đếm tháng từ 0 - 11)
+        renderMiniCalendar(m - 1, y, history);
+    });
+}
+
+function renderMiniCalendar(month, year, history) {
+    const wrapper = document.getElementById('calendar-wrapper');
+    const activeDays = new Set();
+    
+    let monthMins = 0;
+    let monthSessions = 0;
+    
+    // Đếm số ngày có tập và tính tổng thời gian trong tháng được chọn
+    history.forEach(record => {
+        const d = new Date(record.isoDate || record.timestamp);
+        if (d.getMonth() === month && d.getFullYear() === year) {
+            activeDays.add(d.getDate());
+            monthMins += parseInt(record.duration) || 0;
+            monthSessions++;
+        }
+    });
+
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const displayMonth = String(month + 1).padStart(2, '0');
+    let label = (month === currentMonth && year === currentYear) ? "THÁNG NÀY" : `THÁNG ${displayMonth}/${year}`;
+    
+    // Cập nhật các con số lên màn hình
+    document.getElementById('dash-month-label').innerText = label;
+    document.getElementById('dash-month-days').innerText = activeDays.size;
+    
+    // Cập nhật Thanh Tóm Tắt Tháng
+    document.getElementById('summary-month-mins').innerText = monthMins;
+    document.getElementById('summary-month-sessions').innerText = monthSessions;
+    let avg = monthSessions > 0 ? Math.round(monthMins / monthSessions) : 0;
+    document.getElementById('summary-month-avg').innerText = avg;
+
+    // Tính toán mốc ngày để vẽ khung lịch
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay(); 
+    const startOffset = firstDay === 0 ? 6 : firstDay - 1; 
+
+    let html = `<div class="calendar-container">
+        <div class="calendar-header">
+            <div class="cal-day-name">Mon</div>
+            <div class="cal-day-name">Tue</div>
+            <div class="cal-day-name">Wed</div>
+            <div class="cal-day-name">Thu</div>
+            <div class="cal-day-name">Fri</div>
+            <div class="cal-day-name">Sat</div>
+            <div class="cal-day-name">Sun</div>
+        </div>
+        <div class="calendar-grid">`;
+        
+    for (let i = 0; i < startOffset; i++) {
+        html += `<div class="cal-slot empty-slot"></div>`;
     }
 
-    // --- ĐỔ DỮ LIỆU LÊN GIAO DIỆN ---
-    if (totalMinutes >= 60) {
-        const hours = Math.floor(totalMinutes / 60);
-        const mins = totalMinutes % 60;
-        document.getElementById('stat-total-time-val').innerText = hours;
-        document.getElementById('stat-total-time-unit').innerHTML = `giờ ${mins > 0 ? `${mins} phút qua` : 'qua'}`;
-    } else {
-        document.getElementById('stat-total-time-val').innerText = totalMinutes;
-        document.getElementById('stat-total-time-unit').innerText = "phút qua";
+    for (let day = 1; day <= daysInMonth; day++) {
+        if (activeDays.has(day)) {
+            html += `<div class="cal-slot active-day">${day}</div>`;
+        } else {
+            html += `<div class="cal-slot">${day}</div>`;
+        }
     }
 
-    document.getElementById('stat-total-sessions-val').innerText = totalSessions;
-    document.getElementById('stat-active-days').innerText = currentMonthDays.size;
-    document.getElementById('stat-week-streak').innerText = streak;
-    document.getElementById('stat-favorite-time').innerText = favoriteTime;
-    document.getElementById('stat-top-benefits').innerHTML = benefitsHtml;
+    html += `</div></div>`;
+    wrapper.innerHTML = html;
 }
 
 // === LOGIC CHUYỂN TAB (THỐNG KÊ <-> LỊCH SỬ) ===

@@ -758,13 +758,26 @@ document.getElementById('btn-skip-modal').addEventListener('click', () => {
 // ==========================================
 // AUTO-SAVE: LƯU NGẦM KHI USER TẮT TRANG ĐỘT NGỘT
 // ==========================================
+// ==========================================
+// AUTO-SAVE: LƯU NGẦM KHI USER TẮT TRANG ĐỘT NGỘT
+// ==========================================
 window.addEventListener('beforeunload', (event) => {
-    // Chỉ kích hoạt lưu ngầm nếu đang thiền và thời gian đã lớn hơn hoặc bằng 2 phút (120s)
     if (isPracticing && elapsedTime >= 120) {
         let practiceHistory = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
         
         let autoCompletedMinutes = Math.floor(elapsedTime / 60);
         let finalDuration = (autoCompletedMinutes >= 2) ? autoCompletedMinutes : 2;
+        
+        // --- LẤY TÊN BÀI THIỀN ---
+        let currentTrackTitle = "Thiền Tĩnh Lặng";
+        const modeGuidedBtn = document.getElementById('mode-guided');
+        if (modeGuidedBtn && modeGuidedBtn.classList.contains('active')) {
+            const trackSelect = document.getElementById("guided-track-select");
+            if (siteData && siteData.guided_meditations && trackSelect) {
+                const track = siteData.guided_meditations[trackSelect.value];
+                if (track) currentTrackTitle = track.title;
+            }
+        }
         
         const now = new Date();
         const record = {
@@ -772,7 +785,8 @@ window.addEventListener('beforeunload', (event) => {
             isoDate: now.toISOString(), 
             displayDate: `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} - ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
             duration: finalDuration,
-            benefits: ["Bài Thiền dừng lại sớm (hệ thống lưu tự động)"] // Đánh dấu đây là record do hệ thống tự cứu
+            trackTitle: currentTrackTitle, // THÊM DÒNG NÀY: Lưu tên bài
+            benefits: ["Kết thúc sớm (hệ thống lưu tự động)"] 
         };
         
         practiceHistory.push(record);
@@ -781,21 +795,31 @@ window.addEventListener('beforeunload', (event) => {
 });
 
 // Hàm lưu trữ data vào Local Storage
+// Hàm lưu trữ data vào Local Storage
 function saveMeditationSession(benefits) {
     let practiceHistory = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+    
+    // --- LẤY TÊN BÀI THIỀN ---
+    let currentTrackTitle = "Thiền Tĩnh Lặng";
+    const modeGuidedBtn = document.getElementById('mode-guided');
+    if (modeGuidedBtn && modeGuidedBtn.classList.contains('active')) {
+        const trackSelect = document.getElementById("guided-track-select");
+        if (siteData && siteData.guided_meditations && trackSelect) {
+            const track = siteData.guided_meditations[trackSelect.value];
+            if (track) currentTrackTitle = track.title;
+        }
+    }
     
     if (editingRecordId) {
         // TRƯỜNG HỢP 1: ĐANG EDIT RECORD CŨ
         const recordIndex = practiceHistory.findIndex(r => r.id === editingRecordId);
         if (recordIndex !== -1) {
-            practiceHistory[recordIndex].benefits = benefits; // Chỉ cập nhật lại lợi ích
+            practiceHistory[recordIndex].benefits = benefits; 
         }
-        editingRecordId = null; // Reset lại trạng thái
+        editingRecordId = null; 
     } else {
-        // TRƯỜNG HỢP 2: LƯU RECORD MỚI VỚI SỐ PHÚT THỰC TẾ
+        // TRƯỜNG HỢP 2: LƯU RECORD MỚI 
         const now = new Date();
-        
-        // Đảm bảo số phút tối thiểu là 2 (vì đã lọt được vào hàm này là phải >= 120s)
         let finalDuration = (actualCompletedMinutes >= 2) ? actualCompletedMinutes : 2;
         
         const record = {
@@ -803,14 +827,13 @@ function saveMeditationSession(benefits) {
             isoDate: now.toISOString(), 
             displayDate: `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} - ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
             duration: finalDuration,
+            trackTitle: currentTrackTitle, // THÊM DÒNG NÀY: Lưu tên bài
             benefits: benefits
         };
         practiceHistory.push(record);
     }
     
     localStorage.setItem('zenPracticeHistory', JSON.stringify(practiceHistory));
-    
-    // Refresh lại giao diện lịch sử
     renderPracticeHistory();
 }
 
@@ -857,6 +880,7 @@ function renderPracticeHistory() {
 }
 
 // Hàm phụ trợ sinh ra mã HTML cho thẻ lịch sử (để dùng chung cho cả ngoài web lẫn trong Modal)
+// Hàm phụ trợ sinh ra mã HTML cho thẻ lịch sử
 function generateHistoryHTML(historyArray) {
     let htmlContent = '';
     historyArray.forEach(session => {
@@ -869,23 +893,27 @@ function generateHistoryHTML(historyArray) {
             }).join('');
         } else {
             benefitsHtml = `<span style="color: #999; font-size: 13px; font-style: italic; display: flex; align-items: center; gap: 5px;">
-                🍃 Trọn vẹn phút giây thiền tập
+                Chưa ghi nhận tác dụng bài thiền.
             </span>`;
         }
 
-        // Tách chuỗi hiển thị thành "Giờ" và "Ngày" riêng biệt
         const rawDate = session.displayDate || session.date || "";
         let timeStr = "";
         let dateStr = rawDate;
 
         if (rawDate.includes(" - ")) {
             const parts = rawDate.split(" - ");
-            timeStr = parts[0].trim(); // Lấy 15:15
-            dateStr = parts[1].trim(); // Lấy 16/7/2026
+            timeStr = parts[0].trim(); 
+            dateStr = parts[1].trim(); 
         }
 
-        // Cấu trúc lại UI: Ngày tháng làm Header nổi bật
-        // Thay vì dùng thẻ bọc (Card) như cũ, giờ chuyển sang dạng dòng (List Item)
+        // --- XỬ LÝ HIỂN THỊ TÊN BÀI THIỀN ---
+        // Đảm bảo tương thích ngược: Nếu dữ liệu cũ không có trackTitle thì bỏ qua
+        let titleHtml = "";
+        if (session.trackTitle) {
+            titleHtml = `<span style="margin: 0 4px; color: #ddd;">•</span> <span style="color: #5a7365; font-weight: 600;">${session.trackTitle}</span>`;
+        }
+
         htmlContent += `
             <div class="history-list-item" style="padding: 16px 0; border-bottom: 1px solid #f0f0f0;">
                 
@@ -896,7 +924,7 @@ function generateHistoryHTML(historyArray) {
                             📅 ${dateStr}
                         </strong>
                         <span style="color: #888; font-size: 13px;">
-                            lúc ${timeStr} <span style="margin: 0 4px; color: #ddd;">•</span> ⏳ ${session.duration} Phút
+                            lúc ${timeStr} <span style="margin: 0 4px; color: #ddd;">•</span> ⏳ ${session.duration} Phút ${titleHtml}
                         </span>
                     </div>
 

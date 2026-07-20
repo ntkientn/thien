@@ -1159,7 +1159,7 @@ nav, .nav, .tabs, .menu, #nav-bar {
    GIAO DIỆN DASHBOARD (UNIFIED BOARD)
 ========================================= */
 .unified-board {
-    background: #fff;
+    background: #faf8f5;
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.04);
     border: 1px solid #eaeaea;
@@ -1282,4 +1282,206 @@ nav, .nav, .tabs, .menu, #nav-bar {
     background-color: #f5f5f5 !important;
     color: #666 !important;
     border: 1px solid #eee !important;
+}
+
+/* =========================================
+   DASHBOARD GRID SYSTEM (NEW)
+========================================= */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media(min-width: 600px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.dash-card {
+    background: #ffffff;
+    border: 1px solid #eae3d5;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+}
+
+.dash-card-header {
+    font-size: 12px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+/* Badge Icon Styles */
+.badge-icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Xóa toàn bộ background, viền và shadow cũ vì SVG sẽ tự đảm nhận */
+}
+
+/* Progress Bar Styles */
+.progress-container {
+    margin-top: auto;
+}
+.progress-track {
+    width: 100%;
+    height: 8px;
+    background: #f0eae1;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    background: #2c4a3e;
+    border-radius: 10px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================================
+   MINI CALENDAR (BOX 3)
+========================================= */
+.calendar-container {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+}
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 12px;
+}
+.cal-day-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #b5b5b5;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px 5px; /* Khoảng cách dòng và cột */
+}
+.cal-slot {
+    aspect-ratio: 1; /* Ép thành hình vuông để dễ bo tròn */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e0e0e0; /* Nền mờ nhạt cho ngày không tập */
+    border-radius: 50%;
+    margin: 0 auto;
+    width: 32px; 
+    height: 32px;
+    transition: all 0.2s ease;
+}
+.cal-slot.active-day {
+    background-color: #2c4a3e; /* Nổi bật ngày có tập */
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(44, 74, 62, 0.3);
+}
+.cal-slot.empty-slot {
+    visibility: hidden; /* Ẩn các ô trống đầu tháng */
+}
+
+/* =========================================
+   HOURLY CHART (BOX 4)
+========================================= */
+.hourly-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 120px;
+    width: 100%;
+    margin-top: 10px;
+    border-bottom: 1px solid #eae3d5;
+    padding-bottom: 5px;
+    gap: 3px; /* Khoảng cách giữa 24 cột */
+}
+
+.chart-bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.chart-bar {
+    width: 100%;
+    background-color: #dcebdf; /* Màu xanh lá rất mờ cho cột bình thường */
+    border-radius: 3px 3px 0 0;
+    transition: all 0.3s ease;
+    min-height: 3px; /* Đảm bảo các khung giờ không có data vẫn hiện 1 vạch mỏng */
+}
+
+.chart-bar-wrapper:hover .chart-bar {
+    background-color: #2c4a3e;
+}
+
+/* Làm nổi bật Top 3 khung giờ */
+.chart-bar.top-hour {
+    background-color: #5a7365; 
+}
+
+.chart-x-axis {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 11px;
+    color: #999;
+    margin-top: 8px;
+    font-weight: 700;
+}
+
+/* Tooltip hiển thị số liệu khi hover */
+.chart-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c4a3e;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.2s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    margin-bottom: 6px;
+    z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Mũi tên nhỏ dưới tooltip */
+.chart-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px;
+    border-style: solid;
+    border-color: #2c4a3e transparent transparent transparent;
+}
+
+.chart-bar-wrapper:hover .chart-tooltip {
+    opacity: 1;
+    visibility: visible;
 }

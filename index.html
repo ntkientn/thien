@@ -218,56 +218,113 @@
                 </div>
 
                 <div id="content-stats" style="padding: 24px;">
-        
-                    <div class="stat-section" style="padding-top: 0;">
-                        <div class="stat-label">Tổng thời gian</div>
-                        <div class="stat-inline-group">
-                            <span class="stat-value" id="stat-total-time-val">0</span>
-                            <span class="stat-unit" id="stat-total-time-unit">phút qua</span>
-                            <span class="stat-value" id="stat-total-sessions-val">0</span>
-                            <span class="stat-unit">lần thiền tập</span>
-                        </div>
-                    </div>
-
-                    <div class="board-divider"></div>
-
-                    <div class="stat-row-2">
-                        <div class="stat-section">
-                            <div class="stat-label">Tháng này</div>
-                            <div class="stat-inline-group">
-                                <span class="stat-value" id="stat-active-days">0</span>
-                                <span class="stat-unit">ngày tĩnh tại</span>
+                    <!-- Lưới Dashboard 4 ô -->
+                    <div class="dashboard-grid">
+                        
+                        <!-- Ô 1: Tổng thời gian & Huy hiệu -->
+                        <div class="dash-card">
+                            <div class="dash-card-header">Tổng thời gian</div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
+                                <div>
+                                    <span class="stat-value" id="dash-total-val">0</span>
+                                    <span class="stat-unit">phút</span>
+                                </div>
+                                <div class="badge-icon" id="dash-current-badge">0h</div>
+                            </div>
+                            
+                            <!-- Thanh Progress Bar -->
+                            <div class="progress-container">
+                                <div class="progress-track">
+                                    <div class="progress-fill" id="dash-progress-fill" style="width: 0%;"></div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-top: 6px; font-weight: 600;">
+                                    <span id="dash-prog-start">0h</span>
+                                    <span>Tới mốc <span id="dash-prog-end">1h</span></span>
+                                </div>
                             </div>
                         </div>
-                        <div class="board-divider-vertical"></div>
-                        <div class="stat-section">
-                            <div class="stat-label">Mạch duy trì</div>
-                            <div class="stat-inline-group">
-                                <span class="stat-value" id="stat-week-streak">0</span>
-                                <span class="stat-unit">tuần liên tiếp</span>
+
+                        <!-- Ô 2: Mạch duy trì (Streaks) -->
+                        <div class="dash-card">
+                            <div class="dash-card-header">Mạch duy trì (TUẦN)</div>
+                            <div style="display: flex; gap: 20px; align-items: center; height: 100%;">
+                                <!-- Mạch hiện tại -->
+                                <div style="flex: 1; text-align: center;">
+                                    <div style="font-size: 32px; font-weight: 800; color: #e67e22; line-height: 1;">
+                                        <span id="dash-current-streak">0</span><span style="font-size: 16px;">w</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px; font-weight: 600;">Hiện tại</div>
+                                </div>
+                                <div style="width: 1px; height: 40px; background: #eaeaea;"></div>
+                                <!-- Mạch dài nhất -->
+                                <div style="flex: 1; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: 700; color: #2c4a3e; line-height: 1;">
+                                        <span id="dash-longest-streak">0</span><span style="font-size: 14px;">w</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px; font-weight: 600;">Dài nhất</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="board-divider"></div>
+                        <!-- Ô 3: Lịch Tích Lũy Tháng -->
+                        <div class="dash-card" style="grid-column: 1 / -1; min-height: 180px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div class="dash-card-header" style="margin-bottom: 0; text-transform: none;">
+                                    <span id="dash-month-label" style="text-transform: uppercase;">THÁNG NÀY</span>: <span style="color:#2c4a3e; font-size: 16px; font-weight: 800;" id="dash-month-days">0</span> ngày thiền tập
+                                </div>
+                                <input type="month" id="dash-month-filter" style="border: none; background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #2c4a3e; outline: none; cursor: pointer;">
+                            </div>
+                            
+                            <div id="calendar-wrapper" style="margin-top: 10px;">
+                                <!-- Lịch sẽ được vẽ bằng Javascript -->
+                            </div>
 
-                    <div class="stat-section">
-                        <div class="stat-label">Khung giờ quen</div>
-                        <div class="stat-inline-group">
-                            <span class="stat-value stat-text-value" id="stat-favorite-time">--</span>
-                            <span class="stat-unit">là lúc bạn thường tập nhất</span>
+                            <!-- THÊM MỚI: Thanh tóm tắt số liệu của tháng -->
+                            <div id="month-summary-stats" style="display: flex; justify-content: space-around; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #eae3d5;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #2c4a3e;" id="summary-month-mins">0</div>
+                                    <div style="font-size: 11px; color: #888; text-transform: uppercase; font-weight: 600;">Phút</div>
+                                </div>
+                                <div style="width: 1px; background: #eaeaea;"></div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #2c4a3e;" id="summary-month-sessions">0</div>
+                                    <div style="font-size: 11px; color: #888; text-transform: uppercase; font-weight: 600;">Lần tập</div>
+                                </div>
+                                <div style="width: 1px; background: #eaeaea;"></div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #2c4a3e;" id="summary-month-avg">0</div>
+                                    <div style="font-size: 11px; color: #888; text-transform: uppercase; font-weight: 600;">Phút/Lần</div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="board-divider"></div>
-
-                    <div class="stat-section">
-                        <div class="stat-label">Giá trị đạt được nhiều nhất</div>
-                        <div id="stat-top-benefits" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;">
-                            <span style="color: #888; font-size: 14px;">Chưa có dữ liệu</span>
+                        <!-- Ô 4: Khung giờ quen thuộc (Time Distribution) -->
+                        <div class="dash-card" style="grid-column: 1 / -1; min-height: 200px;">
+                            <div class="dash-card-header" style="text-transform: none;">
+                                KHUNG GIỜ THIỀN TẬP
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+                                <div style="font-size: 11px; color: #888; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">3 khung giờ yêu thích</div>
+                                <div id="dash-top-hours" style="font-size: 22px; font-weight: 700; color: #2c4a3e; letter-spacing: 1px;">--:--, --:--, --:--</div>
+                            </div>
+                            
+                            <!-- Khung Biểu đồ -->
+                            <div id="hourly-chart-container" class="hourly-chart">
+                                <!-- JS sẽ sinh ra 24 cột ở đây -->
+                            </div>
+                            
+                            <!-- Trục X chia mốc thời gian -->
+                            <div class="chart-x-axis">
+                                <span>0h</span>
+                                <span>6h</span>
+                                <span>12h</span>
+                                <span>18h</span>
+                                <span>23h</span>
+                            </div>
                         </div>
+
                     </div>
-                    
                 </div>
 
                 <div id="content-history" style="display: none; padding: 0 24px 24px 24px;">

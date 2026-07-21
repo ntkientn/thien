@@ -57,7 +57,7 @@
         <section id="tab2" class="tab-content">
             <div class="section-title-wrapper" style="letter-spacing:0.5px">
                 <h2 class="section-title">Không Gian <br>Thiền Định & Hơi Thở</h2>
-                <p class="section-subtitle">Hãy dành trọn không gian này để trở về với chính mình.<br> Lựa chọn <b>Thiền Tĩnh Lặng</b> để tự điều hòa hơi thở giữa sự tĩnh tại nguyên sơ, hoặc <b>Thiền Theo Chỉ Dẫn</b> để bước vào hành trình tỉnh thức qua những lời dẫn nuôi dưỡng tâm hồn.</p>
+                <p class="section-subtitle">Hãy dành trọn không gian này để trở về với chính mình.<br> Lựa chọn <b>Thiền Tĩnh Lặng</b> để tự điều hòa hơi thở giữa sự tĩnh tại nguyên sơ, hoặc <b>Thiền Theo Chỉ Dẫn</b> để bước vào hành trình tỉnh thức với bài thiền có lời dẫn.</p>
             </div>
 
             <div class="practice-dashboard">
@@ -218,6 +218,15 @@
                 </div>
 
                 <div id="content-stats" style="padding: 24px;">
+                    
+                    <!-- THANH HEADER CỦA DASHBOARD -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="color: #2c4a3e; font-size: 18px; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;">Tổng quan</h3>
+                        <button id="btn-open-trophy" style="background: #2c4a3e; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(44, 74, 62, 0.2);">
+                            🏅 Dấu ấn Hành trình
+                        </button>
+                    </div>
+
                     <!-- Lưới Dashboard 4 ô -->
                     <div class="dashboard-grid">
                         
@@ -306,7 +315,7 @@
                             
                             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
                                 <div style="font-size: 11px; color: #888; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">3 khung giờ yêu thích</div>
-                                <div id="dash-top-hours" style="font-size: 22px; font-weight: 700; color: #2c4a3e; letter-spacing: 1px;">--:--, --:--, --:--</div>
+                                <div id="dash-top-hours" class="top-hours-display">--:--</div>
                             </div>
                             
                             <!-- Khung Biểu đồ -->
@@ -334,8 +343,8 @@
 
             </div>
         </section>
-
-            <!-- MODAL KẾT THÚC THIỀN -->
+        
+        <!-- MODAL KẾT THÚC THIỀN -->
         <div id="completion-modal" class="modal-overlay hidden">
             <div class="modal-content edit-modal-content">
                 
@@ -525,6 +534,34 @@
                 </a>
             </div>
         </footer>
+
+        <!-- MODAL TỦ TRƯNG BÀY HUY HIỆU (TROPHY ROOM) -->
+        <div id="trophy-modal" class="modal-overlay hidden">
+            <div class="modal-content trophy-modal-content">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="modal-title" style="margin: 0;">🏅 Dấu ấn hành trình</h3>
+                    <button id="btn-close-trophy" style="background: none; border: none; font-size: 24px; color: #888; cursor: pointer;">&times;</button>
+                </div>
+                
+                <!-- Bảng hiển thị chi tiết khi bấm vào Huy hiệu -->
+                <div id="trophy-detail-box" style="background: #f0f2f1; border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; min-height: 90px;">
+                    <div id="trophy-detail-icon" style="width: 100px; height: 100px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #e0e0e0; border-radius: 50%; font-size: 24px;">
+                        🧘
+                    </div>
+                    <div>
+                        <div id="trophy-detail-name" style="font-size: 16px; font-weight: 700; color: #2c4a3e;">Hành trình Tỉnh thức</div>
+                        <div id="trophy-detail-desc" style="font-size: 13px; color: #666; margin-top: 4px;">Nơi ghi dấu những cột mốc thiền tập của bạn trong suốt hành trình. Chạm vào một huy hiệu bất kỳ bên dưới để xem thông tin chi tiết.</div>
+                    </div>
+                </div>
+
+                <!-- Lưới danh sách huy hiệu được Group lại -->
+                <div id="trophy-grid" style="overflow-y: auto; max-height: 50vh; padding-right: 8px;">
+                    <!-- Javascript sẽ tự động đổ danh sách vào đây -->
+                </div>
+
+            </div>
+        </div>
 
     </main>
 

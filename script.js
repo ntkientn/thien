@@ -1219,7 +1219,7 @@ function renderDashboard() {
     
     history.forEach(record => {
         const dateObj = new Date(record.isoDate || record.timestamp);
-        const hour = dateObj.getHours(); // Lấy trực tiếp giờ từ 0 đến 23
+        const hour = dateObj.getHours(); 
         hourlyCounts[hour]++;
     });
 
@@ -1233,37 +1233,45 @@ function renderDashboard() {
             topHoursList.push({ hour: i, count: hourlyCounts[i] });
         }
     }
-    // Sắp xếp giảm dần theo số lần tập
     topHoursList.sort((a, b) => b.count - a.count);
-    let top3 = topHoursList.slice(0, 3).map(item => item.hour);
+    
+    // Lấy mảng giờ (để check tô màu) và mảng Object (để in text)
+    let top3Hours = topHoursList.slice(0, 3).map(item => item.hour);
+    let top3Data = topHoursList.slice(0, 3);
 
-    // 3. Hiển thị text Top 3 (Thêm số 0 ở trước nếu giờ < 10)
-    const topHoursText = top3.length > 0 
-        ? top3.map(h => `${String(h).padStart(2, '0')}:00`).join(' • ')
+    // 3. Hiển thị text Top 3 kèm theo số lần (metric rõ ràng)
+    const topHoursText = top3Data.length > 0 
+        ? top3Data.map(item => 
+            // white-space: nowrap giúp giữ thời gian và số lần không bao giờ bị rớt dòng tách rời nhau
+            `<span style="white-space: nowrap;">${String(item.hour).padStart(2, '0')}:00 <span style="color:#e67e22; font-size: 0.9em;">(${item.count} lần)</span></span>`
+          ).join(' <span style="color:#ddd; margin: 0 6px;">•</span> ')
         : "--:--";
-    document.getElementById('dash-top-hours').innerText = topHoursText;
+    document.getElementById('dash-top-hours').innerHTML = topHoursText;
 
     // 4. Vẽ 24 cột biểu đồ
     let chartHtml = '';
     for (let i = 0; i < 24; i++) {
         const count = hourlyCounts[i];
         const heightPercent = (count / maxCount) * 100;
-        const isTopHour = top3.includes(i) ? 'top-hour' : '';
+        const isTopHour = top3Hours.includes(i) ? 'top-hour' : '';
         const timeLabel = `${String(i).padStart(2, '0')}:00`;
         
+        // Nếu số lần = 0: Ẩn hoàn toàn cột (chiều cao = 0, background trong suốt)
+        // Nếu số lần > 0: Hiện con số nhỏ ở trên đỉnh và tính chiều cao tối thiểu để dễ bấm
+        const countDisplay = count > 0 ? `<div style="font-size: 9px; color: #888; font-weight: 700; margin-bottom: 2px;">${count}</div>` : '';
+        const barStyle = count > 0 ? `height: ${Math.max(heightPercent, 5)}%; min-height: 4px;` : `height: 0px; min-height: 0px; background: transparent;`;
+        
         chartHtml += `
-            <div class="chart-bar-wrapper">
+            <div class="chart-bar-wrapper" style="align-items: center;">
                 <div class="chart-tooltip">${timeLabel} - ${count} lần</div>
-                <div class="chart-bar ${isTopHour}" style="height: ${heightPercent > 0 ? heightPercent : 3}%"></div>
+                ${countDisplay}
+                <div class="chart-bar ${isTopHour}" style="${barStyle}"></div>
             </div>
         `;
     }
     document.getElementById('hourly-chart-container').innerHTML = chartHtml;
 }
 
-// ==========================================
-// TÍNH NĂNG VẼ LỊCH TÍCH LŨY (MINI CALENDAR)
-// ==========================================
 // ==========================================
 // TÍNH NĂNG VẼ LỊCH TÍCH LŨY (MINI CALENDAR)
 // ==========================================
@@ -1460,3 +1468,113 @@ function clearSurveyHistory() {
         renderSurveyHistory();
     }
 }
+
+// ==========================================
+// HỆ THỐNG TỦ CÚP (TROPHY ROOM)
+// ==========================================
+
+// Danh mục toàn bộ Huy hiệu trong Game
+const BADGE_CATALOG = [
+    { id: 0, group: "1. Giai đoạn Khởi Nguyên", name: "Hạt Giống Tỉnh Thức", desc: "Đã gieo cho mình hạt giống Thiền Định." },
+    { id: 1, group: "2. Giai đoạn Tăng Trưởng (1 sao)", name: "1 giờ", desc: "Hoàn thành 1 giờ thiền định đầu tiên." },
+    { id: 2, group: "2. Giai đoạn Tăng Trưởng (1 sao)", name: "2 giờ", desc: "Tích lũy đủ 2 giờ thiền định." },
+    { id: 5, group: "2. Giai đoạn Tăng Trưởng (1 sao)", name: "5 giờ", desc: "Tích lũy đủ 5 giờ thiền định." },
+    { id: 10, group: "3. Giai đoạn Tĩnh Tại (2 sao)", name: "10 giờ", desc: "Tích lũy đủ 10 giờ thiền định." },
+    { id: 20, group: "3. Giai đoạn Tĩnh Tại (2 sao)", name: "20 giờ", desc: "Tích lũy đủ 20 giờ thiền định." },
+    { id: 50, group: "3. Giai đoạn Tĩnh Tại (2 sao)", name: "50 giờ", desc: "Tích lũy đủ 50 giờ thiền định." },
+    { id: 100, group: "4. Giai đoạn Khai Sáng (3 sao)", name: "100 giờ", desc: "Tích lũy đủ 100 giờ thiền định." },
+    { id: 200, group: "4. Giai đoạn Khai Sáng (3 sao)", name: "200 giờ", desc: "Tích lũy đủ 200 giờ thiền định." },
+    { id: 500, group: "4. Giai đoạn Khai Sáng (3 sao)", name: "500 giờ", desc: "Tích lũy đủ 500 giờ thiền định." },
+    { id: 1000, group: "5. Giai đoạn Đại Tỉnh Thức", name: "Tuệ Giác", desc: "Tích lũy đủ 1000 giờ thiền định. Trí tuệ bắt đầu bừng sáng, thấu suốt thực tại." },
+    { id: 2000, group: "5. Giai đoạn Đại Tỉnh Thức", name: "Nhất Thể", desc: "Tích lũy đủ 2000 giờ thiền định. Kết nối sâu sắc, hòa điệu với vạn vật." },
+    { id: 5000, group: "5. Giai đoạn Đại Tỉnh Thức", name: "Đại Viên Mãn", desc: "Tích lũy đủ 5000 giờ thiền định. Chạm đến trạng thái Thiền Định tuyệt đối, nhận thức sâu sắc thế giới quan." }
+];
+
+// Hàm gom nhóm danh sách theo "group"
+function groupBy(array, key) {
+    return array.reduce((result, currentValue) => {
+        (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
+        return result;
+    }, {});
+}
+
+function renderTrophyRoom() {
+    const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+    let totalMinutes = 0;
+    history.forEach(r => totalMinutes += (parseInt(r.duration) || 0));
+    const totalHours = totalMinutes / 60;
+
+    const groupedBadges = groupBy(BADGE_CATALOG, 'group');
+    let html = '';
+
+    for (const groupName in groupedBadges) {
+        html += `<div class="trophy-group-title">${groupName}</div>`;
+        html += `<div class="trophy-badges-container">`;
+        
+        groupedBadges[groupName].forEach(badge => {
+            const isUnlocked = totalHours >= badge.id;
+            const lockedClass = isUnlocked ? '' : 'trophy-locked';
+            
+            // Vẽ lại SVG từ hàm có sẵn
+            const svgIcon = generateBadgeSVG(badge.id);
+            
+            // Truyền dữ liệu vào Data attributes để khi click sẽ lấy ra dùng
+            html += `
+                <div class="trophy-badge-item ${lockedClass}" 
+                     data-id="${badge.id}" 
+                     data-name="${badge.name}" 
+                     data-desc="${badge.desc}"
+                     data-unlocked="${isUnlocked}"
+                     onclick="viewBadgeDetail(this)">
+                    ${svgIcon}
+                </div>
+            `;
+        });
+        html += `</div>`;
+    }
+    
+    document.getElementById('trophy-grid').innerHTML = html;
+}
+
+// Xử lý khi user bấm vào 1 huy hiệu để xem chi tiết
+window.viewBadgeDetail = function(element) {
+    const id = element.getAttribute('data-id');
+    const name = element.getAttribute('data-name');
+    const desc = element.getAttribute('data-desc');
+    const isUnlocked = element.getAttribute('data-unlocked') === 'true';
+
+    const detailIcon = document.getElementById('trophy-detail-icon');
+    const detailName = document.getElementById('trophy-detail-name');
+    const detailDesc = document.getElementById('trophy-detail-desc');
+
+    // Cập nhật giao diện Box hiển thị
+    detailIcon.innerHTML = generateBadgeSVG(parseInt(id));
+    detailIcon.style.filter = 'none';    
+    detailName.innerText = name;
+    
+    if (isUnlocked) {
+        detailName.style.color = "#2c4a3e";
+        detailDesc.innerHTML = `✅ <b>Đã đạt được!</b> ${desc}`;
+    } else {
+        detailName.style.color = "#888";
+        detailDesc.innerHTML = `🔒 <b>Chưa mở khóa:</b> Cần ${desc}`;
+    }
+}
+
+// Lắng nghe sự kiện Đóng/Mở Modal Tủ Cúp
+document.addEventListener("DOMContentLoaded", () => {
+    const btnOpen = document.getElementById('btn-open-trophy');
+    const btnClose = document.getElementById('btn-close-trophy');
+    const modal = document.getElementById('trophy-modal');
+
+    if (btnOpen && btnClose && modal) {
+        btnOpen.addEventListener('click', () => {
+            renderTrophyRoom(); // Cập nhật lại số liệu mới nhất trước khi mở
+            modal.classList.remove('hidden');
+        });
+
+        btnClose.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    }
+});

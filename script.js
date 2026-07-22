@@ -721,6 +721,7 @@ function showCompletionModal() {
     
     // Hiển thị modal
     document.getElementById('completion-modal').classList.remove('hidden');
+    document.body.classList.add('no-scroll'); document.documentElement.classList.add('no-scroll');
 }
 
 // Bắt sự kiện chọn nhiều Chip (Multiple-click)
@@ -872,6 +873,7 @@ function renderPracticeHistory() {
             document.getElementById('btn-view-all-history').addEventListener('click', () => {
                 document.getElementById('all-history-list').innerHTML = generateHistoryHTML(reversedHistory);
                 document.getElementById('all-history-modal').classList.remove('hidden');
+                document.body.classList.add('no-scroll'); document.documentElement.classList.add('no-scroll');
             });
         } else {
             viewAllContainer.innerHTML = ''; 
@@ -946,6 +948,7 @@ function generateHistoryHTML(historyArray) {
 // Xử lý đóng Modal Lịch sử
 document.getElementById('btn-close-history-modal').addEventListener('click', () => {
     document.getElementById('all-history-modal').classList.add('hidden');
+    document.body.classList.remove('no-scroll'); document.documentElement.classList.remove('no-scroll');
 });
 
 // THUẬT TOÁN EXPORT RA FILE CSV DÀNH CHO EXCEL
@@ -1027,6 +1030,7 @@ function openEditModal(recordId) {
 
     // 4. Hiển thị Modal
     modal.classList.remove('hidden');
+    document.body.classList.add('no-scroll'); document.documentElement.classList.add('no-scroll');
 }
 
 // Hàm tự động tạo mã ảnh SVG cho các Huy hiệu
@@ -1162,7 +1166,9 @@ function renderDashboard() {
     document.getElementById('dash-progress-fill').style.width = progressPercent + "%";
     document.getElementById('dash-prog-start').innerText = (totalHours).toFixed(1) + "h";
     document.getElementById('dash-prog-end').innerText = nextMilestone + "h";
-
+    // Cập nhật sự kiện click để truyền đúng tên Huy hiệu Thời gian hiện tại
+    const currentBadgeObj = BADGE_CATALOG.find(b => b.id === currentMilestone) || BADGE_CATALOG[0];
+    document.getElementById('dash-current-badge').setAttribute('onclick', `openCategoryModal('time', '${currentBadgeObj.name}')`);
     // =====================================
     // BOX 2: MẠCH DUY TRÌ (WEEKLY STREAKS)
     // =====================================
@@ -1207,8 +1213,43 @@ function renderDashboard() {
     // Render BOX 2
     document.getElementById('dash-current-streak').innerText = currentStreak;
     document.getElementById('dash-longest-streak').innerText = longestStreak;
+    
+    // --- THUẬT TOÁN LOGIC TÌM BADGE CHUẨN ---
+    let targetStreakBadge = STREAK_CATALOG[0]; // Mặc định hiển thị mốc thấp nhất (10w)
+    let isStreakUnlocked = false;
 
-    // Placeholder cho BOX 3 (Tháng này)
+    // Tìm huy hiệu cao nhất MÀ NGƯỜI DÙNG ĐÃ ĐẠT ĐƯỢC
+    let achievedStreakBadge = null;
+    for (let i = 0; i < STREAK_CATALOG.length; i++) {
+        if (longestStreak >= STREAK_CATALOG[i].id) {
+            achievedStreakBadge = STREAK_CATALOG[i];
+        }
+    }
+
+    if (achievedStreakBadge) {
+        // Đã đạt được ít nhất 1 mốc -> Show mốc cao nhất đã đạt
+        targetStreakBadge = achievedStreakBadge;
+        isStreakUnlocked = true;
+    } else {
+        // Chưa đạt mốc nào (VD: 2w) -> Show mốc 10w nhưng ở trạng thái KHÓA XÁM
+        targetStreakBadge = STREAK_CATALOG[0];
+        isStreakUnlocked = false;
+    }
+
+    // Đổ SVG vào HTML
+    const streakBadgeContainer = document.getElementById('dash-streak-badge');
+    streakBadgeContainer.innerHTML = generateStreakSVG(targetStreakBadge.id);
+    
+    // Áp dụng bộ lọc xám nếu chưa mở khóa
+    if (!isStreakUnlocked) {
+        streakBadgeContainer.classList.add('trophy-locked');
+    } else {
+        streakBadgeContainer.classList.remove('trophy-locked');
+    }
+    
+    // Gán sự kiện click để focus đúng vào badge đang hiển thị
+    streakBadgeContainer.setAttribute('onclick', `openCategoryModal('streak', '${targetStreakBadge.name}')`);
+
     // Khởi tạo Lưới Lịch Tích Lũy
     initMonthlyCalendar(history);
 
@@ -1270,6 +1311,59 @@ function renderDashboard() {
         `;
     }
     document.getElementById('hourly-chart-container').innerHTML = chartHtml;
+    // =====================================
+    // BOX 5: THÀNH QUẢ THIỀN TẬP (BENEFITS PEBBLES)
+    // =====================================
+    // 1. Thống kê số lần đạt được từng Benefit
+    let benefitCounts = {};
+    history.forEach(record => {
+        if (record.benefits && Array.isArray(record.benefits)) {
+            record.benefits.forEach(b => {
+                benefitCounts[b] = (benefitCounts[b] || 0) + 1;
+            });
+        }
+    });
+
+    // 2. Lọc ra danh sách các Thành quả ĐÃ ĐẠT ĐƯỢC (count > 0) để show lên Dashboard
+    let achievedBenefitsHtml = '';
+    let achievedCount = 0;
+
+    BENEFITS_CONFIG.forEach(category => {
+        category.items.forEach(item => {
+            const count = benefitCounts[item.value] || 0;
+            if (count > 0) { // Chỉ show những cái đã từng đạt ít nhất 1 lần
+                achievedCount++;
+                
+                // LOGIC MỚI: Chỉ mở khóa (hết xám) khi đạt 100 lần
+                const isUnlocked = count >= 100; 
+                const lockedClass = isUnlocked ? '' : 'trophy-locked';
+                
+                const emoji = item.label.split(' ')[0]; 
+                const svgPebble = generateBenefitSVG(item.groupClass, emoji);
+                
+                achievedBenefitsHtml += `
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 64px; flex-shrink: 0; cursor: pointer;" 
+                    onclick="openCategoryModal('benefit', '${item.value}')" 
+                    title="${item.value}">
+                        <div class="${lockedClass}" style="width: 56px; height: 56px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                            ${svgPebble}
+                        </div>
+                        <div style="font-size: 11px; font-weight: 700; color: #2c4a3e; margin-top: 4px; background: #eae3d5; padding: 2px 8px; border-radius: 10px; white-space: nowrap;">
+                            ${count}/100
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    });
+
+    // 3. Render ra UI
+    const benefitRow = document.getElementById('benefit-badges-row');
+    if (achievedCount > 0) {
+        benefitRow.innerHTML = achievedBenefitsHtml;
+    } else {
+        benefitRow.innerHTML = `<div style="font-size: 13px; color: #888; font-style: italic; width: 100%; text-align: center; padding: 10px 0;">Hành trình bắt đầu từ những tĩnh lặng đầu tiên. Hãy thực hành thiền để gieo hạt giống.</div>`;
+    }
 }
 
 // ==========================================
@@ -1489,8 +1583,114 @@ const BADGE_CATALOG = [
     { id: 2000, group: "5. Giai đoạn Đại Tỉnh Thức", name: "Nhất Thể", desc: "Tích lũy đủ 2000 giờ thiền định. Kết nối sâu sắc, hòa điệu với vạn vật." },
     { id: 5000, group: "5. Giai đoạn Đại Tỉnh Thức", name: "Đại Viên Mãn", desc: "Tích lũy đủ 5000 giờ thiền định. Chạm đến trạng thái Thiền Định tuyệt đối, nhận thức sâu sắc thế giới quan." }
 ];
+// ==========================================
+// HỆ THỐNG DẤU ẤN KIÊN ĐỊNH (WEEK STREAK)
+// ==========================================
 
-// Hàm gom nhóm danh sách theo "group"
+const STREAK_CATALOG = [
+    { id: 10, group: "1. Nền Tảng Kiên Định", name: "Dòng Chảy Tĩnh Lặng", desc: "Duy trì thực hành 10 tuần liên tiếp." },
+    { id: 20, group: "1. Nền Tảng Kiên Định", name: "Suối Nguồn An Vui", desc: "Duy trì thực hành 20 tuần liên tiếp." },
+    { id: 50, group: "1. Nền Tảng Kiên Định", name: "Tâm Kiên Định", desc: "Giữ vững nhịp độ tu tập suốt 50 tuần (gần 1 năm)." },
+    { id: 100, group: "2. Chặng Đường Tỉnh Thức", name: "Bước Chân Tỉnh Thức", desc: "100 tuần không rời bỏ chánh niệm." },
+    { id: 200, group: "2. Chặng Đường Tỉnh Thức", name: "Tâm Tĩnh Trí Sáng", desc: "Duy trì thực hành 200 tuần liên tiếp." },
+    { id: 500, group: "2. Chặng Đường Tỉnh Thức", name: "Đạo Tâm Bất Thoái", desc: "Duy trì thực hành 500 tuần liên tiếp." },
+    { id: 1000, group: "3. Nhất Tâm Bất Loạn", name: "Kim Cương Tâm", desc: "1000 tuần tinh tấn, thiền định đã hòa làm một với hơi thở." }
+];
+
+function generateStreakSVG(weeks) {
+    let gradientId, fillConfig, dropShadow;
+    let textColor = "#ffffff"; // Mặc định chữ màu trắng
+
+    // Phân nhóm 3 dải màu theo đúng yêu cầu
+    if (weeks <= 50) {
+        // Nhóm 1: Màu Đồng / Đất Nung (Earth Bronze)
+        gradientId = `streak-earth-${weeks}`;
+        fillConfig = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ba8759" />
+                        <stop offset="100%" stop-color="#8c5a35" />
+                      </linearGradient>`;
+        dropShadow = '';
+    } else if (weeks <= 500) {
+        // Nhóm 2: Xanh Lục Bảo sâu (Deep Emerald)
+        gradientId = `streak-emerald-${weeks}`;
+        fillConfig = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#4a7c82" />
+                        <stop offset="100%" stop-color="#1e3b3e" />
+                      </linearGradient>`;
+        dropShadow = '';
+    } else {
+        // Nhóm 3 (1000w): Kim Cương Tỏa Sáng (Glowing Diamond)
+        gradientId = `streak-diamond-${weeks}`;
+        fillConfig = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ffffff" />
+                        <stop offset="40%" stop-color="#f0fbfe" />
+                        <stop offset="100%" stop-color="#a8e4ee" />
+                      </linearGradient>
+                      <filter id="glow-diamond" x="-30%" y="-30%" width="160%" height="160%">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>`;
+        dropShadow = 'filter="url(#glow-diamond)"';
+        textColor = "#124a52"; // Chữ màu xanh thẫm để nổi bật trên nền kim cương sáng
+    }
+
+    // Tọa độ vẽ Lục giác bo tròn góc (Rounded Hexagon)
+    const hexPath = "M50 4 C53 4 56 6 58 7.5 L88 25 C92 27 94 30 94 34 L94 66 C94 70 92 73 88 75 L58 92.5 C56 94 53 96 50 96 C47 96 44 94 42 92.5 L12 75 C8 73 6 70 6 66 L6 34 C6 30 8 27 12 25 L42 7.5 C44 6 47 4 50 4 Z";
+    
+    return `
+    <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <defs>
+            ${fillConfig}
+        </defs>
+        <path d="${hexPath}" fill="url(#${gradientId})" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" ${dropShadow}></path>
+        
+        <!-- Căn chỉnh con số và chữ 'w' -->
+        <text x="50" y="58" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="28" fill="${textColor}" text-anchor="middle" letter-spacing="0.5">
+            ${weeks}<tspan font-size="18" font-weight="600" dy="-1">w</tspan>
+        </text>
+    </svg>`;
+}
+
+// ==========================================
+// HÀM VẼ SVG: VIÊN ĐÁ CUỘI (BENEFIT PEBBLE)
+// ==========================================
+function generateBenefitSVG(groupClass, emoji) {
+    let colorStart, colorEnd;
+    
+    // Luôn luôn vẽ màu Gốc (Màu xám khóa sẽ do CSS .trophy-locked đảm nhận)
+    if (groupClass === "emotional") {
+        colorStart = "#f6d365"; colorEnd = "#fda085"; 
+    } else if (groupClass === "physical") {
+        colorStart = "#84fab0"; colorEnd = "#8fd3f4"; 
+    } else { 
+        colorStart = "#667eea"; colorEnd = "#764ba2"; 
+    }
+
+    // Hình dáng Pebble (Đá cuội) đã được vuốt lại để bất đối xứng, tự nhiên và dẹt hơn
+    const pebblePath = "M 50 8 C 75 10 95 30 90 65 C 85 90 40 95 15 75 C -5 50 15 10 50 8 Z";
+
+    return `
+    <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="grad-${groupClass}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="${colorStart}" />
+                <stop offset="100%" stop-color="${colorEnd}" />
+            </linearGradient>
+            <filter id="shadow-pebble" x="-10%" y="-10%" width="120%" height="120%">
+                <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.2"/>
+            </filter>
+        </defs>
+        <path d="${pebblePath}" fill="url(#grad-${groupClass})" filter="url(#shadow-pebble)"/>
+        
+        <!-- Tăng độ đậm của vầng sáng trắng lên 60% để cách ly màu tốt hơn -->
+        <circle cx="50" cy="53" r="22" fill="rgba(255,255,255,0.6)" />
+        
+        <!-- Thêm style text-shadow (bóng đổ viền đen mờ) để Emoji nổi bật 3D khỏi nền -->
+        <text x="50" y="56" font-size="32" text-anchor="middle" dominant-baseline="middle" style="text-shadow: 0px 3px 6px rgba(0,0,0,0.3);">${emoji}</text>
+    </svg>`;
+}
+
+// Hàm gom nhóm Badge theo "group"
 function groupBy(array, key) {
     return array.reduce((result, currentValue) => {
         (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
@@ -1498,83 +1698,212 @@ function groupBy(array, key) {
     }, {});
 }
 
-function renderTrophyRoom() {
-    const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
-    let totalMinutes = 0;
-    history.forEach(r => totalMinutes += (parseInt(r.duration) || 0));
-    const totalHours = totalMinutes / 60;
+// ==========================================
+// UNIVERSAL CONTEXTUAL MODAL (DẤU ẤN HÀNH TRÌNH ĐỘNG)
+// ==========================================
 
-    const groupedBadges = groupBy(BADGE_CATALOG, 'group');
-    let html = '';
-
-    for (const groupName in groupedBadges) {
-        html += `<div class="trophy-group-title">${groupName}</div>`;
-        html += `<div class="trophy-badges-container">`;
-        
-        groupedBadges[groupName].forEach(badge => {
-            const isUnlocked = totalHours >= badge.id;
-            const lockedClass = isUnlocked ? '' : 'trophy-locked';
-            
-            // Vẽ lại SVG từ hàm có sẵn
-            const svgIcon = generateBadgeSVG(badge.id);
-            
-            // Truyền dữ liệu vào Data attributes để khi click sẽ lấy ra dùng
-            html += `
-                <div class="trophy-badge-item ${lockedClass}" 
-                     data-id="${badge.id}" 
-                     data-name="${badge.name}" 
-                     data-desc="${badge.desc}"
-                     data-unlocked="${isUnlocked}"
-                     onclick="viewBadgeDetail(this)">
-                    ${svgIcon}
-                </div>
-            `;
-        });
-        html += `</div>`;
-    }
+window.openCategoryModal = function(type, targetName = null) {
+    const modalTitle = document.getElementById('universal-modal-title');
+    const trophyGrid = document.getElementById('trophy-grid');
+    const detailBox = document.getElementById('trophy-detail-box');
+    const modal = document.getElementById('trophy-modal');
     
-    document.getElementById('trophy-grid').innerHTML = html;
+    let html = '';
+    const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+
+    // Reset lại Box chi tiết hiển thị mặc định
+    detailBox.innerHTML = `
+        <div id="trophy-detail-icon" style="width: 100px; height: 100px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: transparent;">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#f0f2f1" stroke="#eae3d5" stroke-width="2" stroke-dasharray="4 4"/></svg>
+        </div>
+        <div>
+            <div id="trophy-detail-name" style="font-size: 16px; font-weight: 700; color: #2c4a3e;">Chạm để khám phá</div>
+            <div id="trophy-detail-desc" style="font-size: 13px; color: #666; margin-top: 4px;">Chọn một dấu ấn bên dưới để xem thành tựu bạn đã đạt được trên hành trình.</div>
+        </div>
+    `;
+
+    // -----------------------------------------------------
+    // 1. MỞ DẤU ẤN THỜI GIAN
+    // -----------------------------------------------------
+    if (type === 'time') {
+        modalTitle.innerHTML = '⏳ Dấu ấn Thời gian';
+        let totalMinutes = 0;
+        history.forEach(r => totalMinutes += (parseInt(r.duration) || 0));
+        const totalHours = totalMinutes / 60;
+
+        const groupedBadges = groupBy(BADGE_CATALOG, 'group');
+        for (const groupName in groupedBadges) {
+            html += `<div class="trophy-group-title">${groupName}</div><div class="trophy-badges-container">`;
+            groupedBadges[groupName].forEach(badge => {
+                const isUnlocked = totalHours >= badge.id;
+                const lockedClass = isUnlocked ? '' : 'trophy-locked';
+                const svgIcon = generateBadgeSVG(badge.id); 
+                
+                // Truyền data ngầm qua data-attributes, tránh lỗi chuỗi nháy đơn
+                html += `
+                    <div class="trophy-badge-item ${lockedClass}" 
+                         data-name="${badge.name}"
+                         data-desc="${badge.desc}"
+                         data-unlocked="${isUnlocked}"
+                         onclick="viewDynamicDetail(this)">
+                        ${svgIcon}
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+    } 
+    
+    // -----------------------------------------------------
+    // 2. MỞ DẤU ẤN KIÊN ĐỊNH (STREAK)
+    // -----------------------------------------------------
+    else if (type === 'streak') {
+        modalTitle.innerHTML = '🛡️ Dấu ấn Kiên định';
+        
+        let weekStarts = new Set();
+        history.forEach(r => {
+            let d = new Date(r.isoDate || r.timestamp);
+            let day = d.getDay();
+            let diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            weekStarts.add(new Date(d.setDate(diff)).setHours(0,0,0,0));
+        });
+        let sortedWeeks = Array.from(weekStarts).sort((a, b) => b - a);
+        let longestStreak = 0, tempLongest = 0;
+        if (sortedWeeks.length > 0) {
+            longestStreak = 1; tempLongest = 1;
+            for (let i = 0; i < sortedWeeks.length - 1; i++) {
+                if (sortedWeeks[i] - sortedWeeks[i+1] === 7 * 24 * 60 * 60 * 1000) {
+                    tempLongest++;
+                    if (tempLongest > longestStreak) longestStreak = tempLongest;
+                } else tempLongest = 1;
+            }
+        }
+
+        const groupedStreaks = groupBy(STREAK_CATALOG, 'group');
+        for (const groupName in groupedStreaks) {
+            html += `<div class="trophy-group-title">${groupName}</div><div class="trophy-badges-container">`;
+            groupedStreaks[groupName].forEach(badge => {
+                const isUnlocked = longestStreak >= badge.id;
+                const lockedClass = isUnlocked ? '' : 'trophy-locked';
+                const svgIcon = generateStreakSVG(badge.id);
+                
+                html += `
+                    <div class="trophy-badge-item ${lockedClass}" 
+                         data-name="${badge.name}"
+                         data-desc="${badge.desc}"
+                         data-unlocked="${isUnlocked}"
+                         onclick="viewDynamicDetail(this)">
+                        ${svgIcon}
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+    }
+
+    // -----------------------------------------------------
+    // 3. MỞ THÀNH QUẢ (BENEFITS)
+    // -----------------------------------------------------
+    else if (type === 'benefit') {
+        modalTitle.innerHTML = '🌿 Thành quả Thiền tập';
+        
+        let benefitCounts = {};
+        history.forEach(r => {
+            if (r.benefits) r.benefits.forEach(b => benefitCounts[b] = (benefitCounts[b] || 0) + 1);
+        });
+
+        BENEFITS_CONFIG.forEach(category => {
+            html += `<div class="trophy-group-title">${category.categoryTitle}</div><div class="trophy-badges-container">`;
+            
+            category.items.forEach(item => {
+                const count = benefitCounts[item.value] || 0;
+                
+                // LOGIC MỚI: Chỉ mở khóa khi đạt 100 lần
+                const isUnlocked = count >= 100;
+                const lockedClass = isUnlocked ? '' : 'trophy-locked'; 
+                
+                const emoji = item.label.split(' ')[0];
+                const svgIcon = generateBenefitSVG(item.groupClass, emoji);
+                
+                // Cập nhật text hiển thị tiến độ
+                const desc = `Tiến độ: ${count}/100 lần.<br>Bạn đã tìm thấy sự ${item.value.toLowerCase()} thông qua các buổi thiền định.`;
+                
+                html += `
+                    <div class="trophy-badge-item ${lockedClass}" style="width: 64px; height: 64px;"
+                         data-name="${item.value}"
+                         data-desc="${desc}"
+                         data-unlocked="${isUnlocked}"
+                         onclick="viewDynamicDetail(this)">
+                        ${svgIcon}
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        });
+    }
+
+    trophyGrid.innerHTML = html;
+    modal.classList.remove('hidden');
+    document.body.classList.add('no-scroll'); document.documentElement.classList.add('no-scroll');
+    // =====================================
+    // LOGIC FOCUS & TỰ ĐỘNG CUỘN ĐẾN BADGE
+    // =====================================
+    if (targetName) {
+        // Đợi 50ms để DOM kịp in toàn bộ các badge mới ra màn hình
+        setTimeout(() => {
+            const targetBadge = trophyGrid.querySelector(`[data-name="${targetName}"]`);
+            if (targetBadge) {
+                // 1. Giả lập một cú chạm để thông tin nhảy lên Box chi tiết phía trên
+                viewDynamicDetail(targetBadge);
+                
+                // 2. Tự động cuộn danh sách (lưới) đến đúng vị trí của Badge này
+                targetBadge.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // 3. Hiệu ứng nhịp đập (Pulse) nhẹ để người dùng biết mắt cần nhìn vào đâu
+                targetBadge.style.transform = 'scale(1.15)';
+                setTimeout(() => { targetBadge.style.transform = 'none'; }, 400);
+            }
+        }, 50);
+    }
 }
 
-// Xử lý khi user bấm vào 1 huy hiệu để xem chi tiết
-window.viewBadgeDetail = function(element) {
-    const id = element.getAttribute('data-id');
+// Hàm render dữ liệu Động lấy trực tiếp từ phần tử HTML bị bấm
+window.viewDynamicDetail = function(element) {
     const name = element.getAttribute('data-name');
     const desc = element.getAttribute('data-desc');
     const isUnlocked = element.getAttribute('data-unlocked') === 'true';
+    
+    // Tuyệt chiêu: Lấy thẳng cái hình SVG trong danh sách đắp lên Box chi tiết
+    const svgContent = element.innerHTML; 
 
     const detailIcon = document.getElementById('trophy-detail-icon');
     const detailName = document.getElementById('trophy-detail-name');
     const detailDesc = document.getElementById('trophy-detail-desc');
 
-    // Cập nhật giao diện Box hiển thị
-    detailIcon.innerHTML = generateBadgeSVG(parseInt(id));
-    detailIcon.style.filter = 'none';    
+    detailIcon.innerHTML = svgContent;
+    // Hủy bỏ bộ lọc xám (grayscale) để dù chưa mở khóa, Box chi tiết vẫn hiện FULL màu
+    detailIcon.style.filter = 'none'; 
+    
     detailName.innerText = name;
     
     if (isUnlocked) {
         detailName.style.color = "#2c4a3e";
-        detailDesc.innerHTML = `✅ <b>Đã đạt được!</b> ${desc}`;
+        detailDesc.innerHTML = `✅ <b>Thành tựu của bạn:</b><br> ${desc}`;
     } else {
         detailName.style.color = "#888";
-        detailDesc.innerHTML = `🔒 <b>Chưa mở khóa:</b> Cần ${desc}`;
+        detailDesc.innerHTML = `🔒 <b>Chưa mở khóa:</b><br> ${desc}`;
     }
 }
 
-// Lắng nghe sự kiện Đóng/Mở Modal Tủ Cúp
 document.addEventListener("DOMContentLoaded", () => {
-    const btnOpen = document.getElementById('btn-open-trophy');
     const btnClose = document.getElementById('btn-close-trophy');
     const modal = document.getElementById('trophy-modal');
 
-    if (btnOpen && btnClose && modal) {
-        btnOpen.addEventListener('click', () => {
-            renderTrophyRoom(); // Cập nhật lại số liệu mới nhất trước khi mở
-            modal.classList.remove('hidden');
-        });
-
+    if (btnClose && modal) {
         btnClose.addEventListener('click', () => {
             modal.classList.add('hidden');
+            document.body.classList.remove('no-scroll'); document.documentElement.classList.remove('no-scroll');
         });
     }
 });
+    

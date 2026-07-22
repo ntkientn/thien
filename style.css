@@ -1287,15 +1287,19 @@ nav, .nav, .tabs, .menu, #nav-bar {
 /* =========================================
    DASHBOARD GRID SYSTEM (NEW)
 ========================================= */
+/* =========================================
+   DASHBOARD GRID SYSTEM (NEW)
+========================================= */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    /* FIX LỖI TRÀN VIỀN: Thay 1fr bằng minmax(0, 1fr) để ép lưới không phình to */
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
 }
 
 @media(min-width: 600px) {
     .dashboard-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -1303,10 +1307,17 @@ nav, .nav, .tabs, .menu, #nav-bar {
     background: #ffffff;
     border: 1px solid #eae3d5;
     border-radius: 12px;
-    padding: 20px;
+    padding: 15px; /* Giảm nhẹ padding trên mobile để nội dung có thêm không gian thở */
     box-shadow: 0 2px 10px rgba(0,0,0,0.02);
     display: flex;
     flex-direction: column;
+    min-width: 0; /* BẮT BUỘC: Ngăn thẻ card bị kéo giãn bởi nội dung bên trong */
+}
+
+@media(min-width: 768px) {
+    .dash-card {
+        padding: 20px; /* Trả lại padding rộng 20px khi xem trên Desktop/Tablet */
+    }
 }
 
 .dash-card-header {
@@ -1571,4 +1582,13 @@ html.no-scroll, body.no-scroll {
 #all-history-list,
 #practice-history-container {
     overscroll-behavior: contain; /* Triệt tiêu lực cuộn thừa, không cho truyền xuống background */
+}
+/* Tối ưu khoảng cách lề trên Mobile cho bảng Dashboard */
+@media (max-width: 480px) {
+    #content-stats, #content-history {
+        padding: 16px !important;
+    }
+    .unified-board > div:first-child {
+        padding: 16px 16px 0 16px !important;
+    }
 }

@@ -759,9 +759,6 @@ document.getElementById('btn-skip-modal').addEventListener('click', () => {
 // ==========================================
 // AUTO-SAVE: LƯU NGẦM KHI USER TẮT TRANG ĐỘT NGỘT
 // ==========================================
-// ==========================================
-// AUTO-SAVE: LƯU NGẦM KHI USER TẮT TRANG ĐỘT NGỘT
-// ==========================================
 window.addEventListener('beforeunload', (event) => {
     if (isPracticing && elapsedTime >= 120) {
         let practiceHistory = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
@@ -795,7 +792,6 @@ window.addEventListener('beforeunload', (event) => {
     }
 });
 
-// Hàm lưu trữ data vào Local Storage
 // Hàm lưu trữ data vào Local Storage
 function saveMeditationSession(benefits) {
     let practiceHistory = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
@@ -882,7 +878,6 @@ function renderPracticeHistory() {
 }
 
 // Hàm phụ trợ sinh ra mã HTML cho thẻ lịch sử (để dùng chung cho cả ngoài web lẫn trong Modal)
-// Hàm phụ trợ sinh ra mã HTML cho thẻ lịch sử
 function generateHistoryHTML(historyArray) {
     let htmlContent = '';
     historyArray.forEach(session => {
@@ -1033,7 +1028,6 @@ function openEditModal(recordId) {
     document.body.classList.add('no-scroll'); document.documentElement.classList.add('no-scroll');
 }
 
-// Hàm tự động tạo mã ảnh SVG cho các Huy hiệu
 // Hàm tự động tạo mã ảnh SVG cho các Huy hiệu theo từng mốc tiến hóa
 function generateBadgeSVG(milestone) {
     let colorStart, colorEnd, textSize, textLabel, bgShape, textY;
@@ -1043,7 +1037,7 @@ function generateBadgeSVG(milestone) {
 
     if (milestone === 0) {
         // CẤP 0: HẠT GIỐNG (Giữ nguyên hình hạt mầm mộc mạc)
-        colorStart = "#d4ccb8"; colorEnd = "#8c7662";
+        colorStart = "#b3cd91"; colorEnd = "#834256";
         textLabel = "SEED"; textSize = "14"; textY = "34.5"; // Chữ nằm chính giữa
         bgShape = `<path d="M32 20 C 40 30 42 42 32 48 C 22 42 24 30 32 20 Z" fill="#ffffff" opacity="0.4"/>`;
         
@@ -1055,7 +1049,7 @@ function generateBadgeSVG(milestone) {
         
     } else if (milestone <= 50) {
         // CẤP 2 (10h, 20h, 50h): 2 SAO CÂN XỨNG
-        colorStart = "#89cff0"; colorEnd = "#2980b9";
+        colorStart = "#89e4f0"; colorEnd = "#29afb9";
         textLabel = milestone + "h"; textSize = "18"; textY = "38";
         bgShape = `
             <g fill="#ffffff" opacity="0.8">
@@ -1076,10 +1070,10 @@ function generateBadgeSVG(milestone) {
             
     } else {
         // CẤP 4 (1000h+): KHAI SÁNG TÂM TRÍ (Họa tiết Vũ trụ siêu cấp)
-        colorStart = "#8E54E9"; colorEnd = "#4776E6";
+        colorStart = "#8041e6"; colorEnd = "#379eb2";
         textLabel = milestone + "h"; textSize = "14"; textY = "34.5"; // Chữ về lại chính giữa
         bgShape = `
-            <g opacity="0.6">
+            <g opacity="0.8">
                 <path d="M32 4 L36 24 L56 28 L38 36 L44 56 L32 42 L20 56 L26 36 L8 28 L28 24 Z" fill="#ffffff"/>
                 <circle cx="32" cy="32" r="16" fill="none" stroke="#ffffff" stroke-width="1.5"/>
                 <circle cx="32" cy="32" r="22" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="2 3"/>
@@ -1606,7 +1600,7 @@ function generateStreakSVG(weeks) {
         // Nhóm 1: Màu Đồng / Đất Nung (Earth Bronze)
         gradientId = `streak-earth-${weeks}`;
         fillConfig = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#ba8759" />
+                        <stop offset="0%" stop-color="#ffdbc0" />
                         <stop offset="100%" stop-color="#8c5a35" />
                       </linearGradient>`;
         dropShadow = '';
@@ -1614,8 +1608,8 @@ function generateStreakSVG(weeks) {
         // Nhóm 2: Xanh Lục Bảo sâu (Deep Emerald)
         gradientId = `streak-emerald-${weeks}`;
         fillConfig = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#4a7c82" />
-                        <stop offset="100%" stop-color="#1e3b3e" />
+                        <stop offset="0%" stop-color="#79c8ae" />
+                        <stop offset="100%" stop-color="#297957" />
                       </linearGradient>`;
         dropShadow = '';
     } else {
@@ -1623,8 +1617,8 @@ function generateStreakSVG(weeks) {
         gradientId = `streak-diamond-${weeks}`;
         fillConfig = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="#ffffff" />
-                        <stop offset="40%" stop-color="#f0fbfe" />
-                        <stop offset="100%" stop-color="#a8e4ee" />
+                        <stop offset="40%" stop-color="#cceef7" />
+                        <stop offset="100%" stop-color="#89d2e9" />
                       </linearGradient>
                       <filter id="glow-diamond" x="-30%" y="-30%" width="160%" height="160%">
                         <feGaussianBlur stdDeviation="4" result="blur" />
@@ -1906,4 +1900,3 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-    

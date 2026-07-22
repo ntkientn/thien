@@ -222,60 +222,72 @@
                     <!-- THANH HEADER CỦA DASHBOARD -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h3 style="color: #2c4a3e; font-size: 18px; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;">Tổng quan</h3>
-                        <button id="btn-open-trophy" style="background: #2c4a3e; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(44, 74, 62, 0.2);">
-                            🏅 Dấu ấn Hành trình
-                        </button>
                     </div>
 
                     <!-- Lưới Dashboard 4 ô -->
                     <div class="dashboard-grid">
                         
-                        <!-- Ô 1: Tổng thời gian & Huy hiệu -->
+                        <!-- Ô 1: Tổng thời gian (Badge -> Progress -> Mốc) -->
                         <div class="dash-card">
                             <div class="dash-card-header">Tổng thời gian</div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
-                                <div>
-                                    <span class="stat-value" id="dash-total-val">0</span>
-                                    <span class="stat-unit">phút</span>
-                                </div>
-                                <div class="badge-icon" id="dash-current-badge">0h</div>
-                            </div>
                             
-                            <!-- Thanh Progress Bar -->
-                            <div class="progress-container">
-                                <div class="progress-track">
-                                    <div class="progress-fill" id="dash-progress-fill" style="width: 0%;"></div>
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                                <!-- Huy hiệu hiện tại -->
+                                <div class="badge-icon" id="dash-current-badge" onclick="openCategoryModal('time')" style="cursor: pointer; flex-shrink: 0; width: 64px; height: 64px; transition: transform 0.2s;" title="Xem Dấu ấn Thời gian">
+                                    <!-- SVG sẽ render ở đây -->
                                 </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-top: 6px; font-weight: 600;">
-                                    <span id="dash-prog-start">0h</span>
-                                    <span>Tới mốc <span id="dash-prog-end">1h</span></span>
+                                
+                                <div style="flex-grow: 1; display: flex; flex-direction: column;">
+                                    <div style="margin-bottom: 6px;">
+                                        <span class="stat-value" id="dash-total-val">0</span>
+                                        <span class="stat-unit">phút</span>
+                                    </div>
+                                    <!-- Thanh Progress Bar -->
+                                    <div class="progress-container" style="margin-top: 0;">
+                                        <div class="progress-track">
+                                            <div class="progress-fill" id="dash-progress-fill" style="width: 0%;"></div>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-top: 6px; font-weight: 600;">
+                                            <span id="dash-prog-start">0h</span>
+                                            <span>Mốc tiếp theo <span id="dash-prog-end">1h</span></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Ô 2: Mạch duy trì (Streaks) -->
+                        <!-- Ô 2: Mạch duy trì (Hiện tại | Dài nhất -> Badge) -->
                         <div class="dash-card">
                             <div class="dash-card-header">Mạch duy trì (TUẦN)</div>
-                            <div style="display: flex; gap: 20px; align-items: center; height: 100%;">
-                                <!-- Mạch hiện tại -->
-                                <div style="flex: 1; text-align: center;">
-                                    <div style="font-size: 32px; font-weight: 800; color: #e67e22; line-height: 1;">
-                                        <span id="dash-current-streak">0</span><span style="font-size: 16px;">w</span>
+                            
+                            <div style="display: flex; height: 100%; gap: 10px; align-items: center;">
+                                
+                                <!-- Phần 1: Mạch hiện tại (50% - Canh giữa) -->
+                                <div style="flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: center; border-right: 1px dashed #eae3d5; padding-right: 10px;">
+                                    <div style="font-size: 36px; font-weight: 800; color: #e67e22; line-height: 1;">
+                                        <span id="dash-current-streak">0</span><span style="font-size: 18px;">w</span>
                                     </div>
-                                    <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px; font-weight: 600;">Hiện tại</div>
+                                    <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 6px; font-weight: 700;">Hiện tại</div>
                                 </div>
-                                <div style="width: 1px; height: 40px; background: #eaeaea;"></div>
-                                <!-- Mạch dài nhất -->
-                                <div style="flex: 1; text-align: center;">
-                                    <div style="font-size: 24px; font-weight: 700; color: #2c4a3e; line-height: 1;">
-                                        <span id="dash-longest-streak">0</span><span style="font-size: 14px;">w</span>
+                                
+                                <!-- Phần 2: Mạch dài nhất + Badge (50% - Canh trái) -->
+                                <div style="flex: 1; display: flex; gap: 12px; align-items: center; background: #faf8f5; padding: 10px 12px; border-radius: 12px; border: 1px solid #eae3d5;">
+                                    <div style="text-align: left; flex-grow: 1;">
+                                        <div style="font-size: 20px; font-weight: 700; color: #2c4a3e; line-height: 1;">
+                                            <span id="dash-longest-streak">0</span><span style="font-size: 14px;">w</span>
+                                        </div>
+                                        <div style="font-size: 10px; color: #888; text-transform: uppercase; margin-top: 4px; font-weight: 700;">Dài nhất</div>
                                     </div>
-                                    <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px; font-weight: 600;">Dài nhất</div>
+                                    
+                                    <div id="dash-streak-badge" style="cursor: pointer; width: 52px; height: 52px; transition: transform 0.2s; flex-shrink: 0;" title="Xem Dấu ấn Kiên định">
+                                        <!-- SVG Lục giác sẽ render ở đây -->
+                                    </div>
                                 </div>
+                                
                             </div>
                         </div>
 
-                        <!-- Ô 3: Lịch Tích Lũy Tháng -->
+                        <!-- Ô 3: Lịch Tích Lũy Tháng (Giữ nguyên gốc) -->
                         <div class="dash-card" style="grid-column: 1 / -1; min-height: 180px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <div class="dash-card-header" style="margin-bottom: 0; text-transform: none;">
@@ -288,7 +300,6 @@
                                 <!-- Lịch sẽ được vẽ bằng Javascript -->
                             </div>
 
-                            <!-- THÊM MỚI: Thanh tóm tắt số liệu của tháng -->
                             <div id="month-summary-stats" style="display: flex; justify-content: space-around; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #eae3d5;">
                                 <div style="text-align: center;">
                                     <div style="font-size: 20px; font-weight: 700; color: #2c4a3e;" id="summary-month-mins">0</div>
@@ -307,7 +318,7 @@
                             </div>
                         </div>
 
-                        <!-- Ô 4: Khung giờ quen thuộc (Time Distribution) -->
+                        <!-- Ô 4: Khung giờ quen thuộc (Giữ nguyên gốc) -->
                         <div class="dash-card" style="grid-column: 1 / -1; min-height: 200px;">
                             <div class="dash-card-header" style="text-transform: none;">
                                 KHUNG GIỜ THIỀN TẬP
@@ -318,18 +329,29 @@
                                 <div id="dash-top-hours" class="top-hours-display">--:--</div>
                             </div>
                             
-                            <!-- Khung Biểu đồ -->
                             <div id="hourly-chart-container" class="hourly-chart">
                                 <!-- JS sẽ sinh ra 24 cột ở đây -->
                             </div>
                             
-                            <!-- Trục X chia mốc thời gian -->
                             <div class="chart-x-axis">
                                 <span>0h</span>
                                 <span>6h</span>
                                 <span>12h</span>
                                 <span>18h</span>
                                 <span>23h</span>
+                            </div>
+                        </div>
+
+                        <!-- Ô 5 (MỚI): Thành quả từ thiền tập -->
+                        <div class="dash-card" style="grid-column: 1 / -1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div class="dash-card-header" style="margin-bottom: 0;">Thành quả từ thiền tập</div>
+                                <div style="font-size: 12px; color: #888; font-weight: 600; cursor: pointer;" onclick="openCategoryModal('benefit')">Xem tất cả ❯</div>
+                            </div>
+                            
+                            <!-- Row chứa các badge dạng cuộn ngang -->
+                            <div id="benefit-badges-row" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none;">
+                                <div style="font-size: 13px; color: #888; font-style: italic;">Đang tải dữ liệu thành quả...</div>
                             </div>
                         </div>
 
@@ -540,7 +562,7 @@
             <div class="modal-content trophy-modal-content">
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 class="modal-title" style="margin: 0;">🏅 Dấu ấn hành trình</h3>
+                    <h3 class="modal-title" id="universal-modal-title" style="margin: 0;">🏅 Dấu ấn hành trình</h3>
                     <button id="btn-close-trophy" style="background: none; border: none; font-size: 24px; color: #888; cursor: pointer;">&times;</button>
                 </div>
                 

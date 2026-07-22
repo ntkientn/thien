@@ -1551,10 +1551,24 @@ nav, .nav, .tabs, .menu, #nav-bar {
 
 /* Hiệu ứng Khóa (Chưa đạt được) */
 .trophy-locked {
-    filter: grayscale(100%) opacity(40%);
+    filter: grayscale(100%) brightness(85%) opacity(85%);
 }
 
 /* Tùy chỉnh thanh cuộn cho khu vực danh sách */
 #trophy-grid::-webkit-scrollbar { width: 6px; }
 #trophy-grid::-webkit-scrollbar-track { background: #f7f5f0; border-radius: 10px; }
 #trophy-grid::-webkit-scrollbar-thumb { background: #d4ccb8; border-radius: 10px; }
+
+/* 1. Khóa cuộn nền triệt để trên cả html và body */
+html.no-scroll, body.no-scroll {
+    overflow: hidden !important;
+}
+
+/* 2. Chống cuộn lan (Scroll Chaining) từ Modal xuống nền */
+.modal-overlay,
+.modal-content,
+#trophy-grid,
+#all-history-list,
+#practice-history-container {
+    overscroll-behavior: contain; /* Triệt tiêu lực cuộn thừa, không cho truyền xuống background */
+}

@@ -1425,6 +1425,10 @@ function renderMiniCalendar(month, year, history) {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay(); 
     const startOffset = firstDay === 0 ? 6 : firstDay - 1; 
+    // Khởi tạo các biến để kiểm tra ngày hôm nay
+    const todayObj = new Date();
+    const isCurrentMonthView = (month === todayObj.getMonth() && year === todayObj.getFullYear());
+    const todayDate = todayObj.getDate();
 
     let html = `<div class="calendar-container">
         <div class="calendar-header">
@@ -1442,12 +1446,19 @@ function renderMiniCalendar(month, year, history) {
         html += `<div class="cal-slot empty-slot"></div>`;
     }
 
+    // LOGIC MỚI: Kiểm tra và gán class 'today'
     for (let day = 1; day <= daysInMonth; day++) {
+        let classNames = "cal-slot";
+        
         if (activeDays.has(day)) {
-            html += `<div class="cal-slot active-day">${day}</div>`;
-        } else {
-            html += `<div class="cal-slot">${day}</div>`;
+            classNames += " active-day";
         }
+        
+        if (isCurrentMonthView && day === todayDate) {
+            classNames += " today";
+        }
+
+        html += `<div class="${classNames}">${day}</div>`;
     }
 
     html += `</div></div>`;

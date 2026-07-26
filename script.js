@@ -397,6 +397,7 @@ function playPhaseSound(frequency, duration, type = 'sine') {
 // Thêm biến global để theo dõi thời gian đã trôi qua
 let elapsedTime = 0; 
 let actualCompletedMinutes = 0; // THÊM DÒNG NÀY: Lưu số phút thực tế đã hoàn thành
+let sessionStartTime = null; // THÊM DÒNG NÀY: Lưu thời điểm bắt đầu thiền
 const BREATHING_DURATION = 120; // 2 phút (120 giây)
 
 function togglePractice() {
@@ -471,6 +472,7 @@ function togglePractice() {
         // ==========================================
         isPracticing = true;
         elapsedTime = 0;
+        sessionStartTime = new Date(); // THÊM DÒNG NÀY: Chốt giờ bắt đầu
 
         startBtn.innerText = "🛑 Dừng lại";
         startBtn.classList.add("active-stop");
@@ -715,13 +717,24 @@ function executeFixedBreathingStep(pace) {
 let selectedBenefits = [];
 
 function showCompletionModal() {
-    // Reset lại trạng thái các nút bấm (Bỏ chọn hết)
+    // 1. TỰ ĐỘNG LƯU NGAY (Đề phòng người dùng ngủ quên hoặc tắt ngang)
+    saveMeditationSession([]);
+    
+    // 2. Lấy ID của chính phiên vừa lưu để chuyển sang chế độ "Ghi đè" (Edit). 
+    // Nếu lát nữa user chọn Benefit và bấm "Lưu ghi nhận", hệ thống sẽ update record này thay vì tạo mới.
+    let history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+    if (history.length > 0) {
+        editingRecordId = history[history.length - 1].id;
+    }
+
+    // 3. Reset lại trạng thái các nút bấm (Bỏ chọn hết)
     selectedBenefits = [];
     document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
     
-    // Hiển thị modal
+    // 4. Hiển thị modal và khóa cuộn nền
     document.getElementById('completion-modal').classList.remove('hidden');
-    document.body.classList.add('no-scroll'); document.documentElement.classList.add('no-scroll');
+    document.body.classList.add('no-scroll'); 
+    document.documentElement.classList.add('no-scroll');
 }
 
 // Bắt sự kiện chọn nhiều Chip (Multiple-click)
@@ -777,7 +790,7 @@ window.addEventListener('beforeunload', (event) => {
             }
         }
         
-        const now = new Date();
+        const now = sessionStartTime || new Date(); 
         const record = {
             id: now.getTime(), 
             isoDate: now.toISOString(), 
@@ -816,7 +829,7 @@ function saveMeditationSession(benefits) {
         editingRecordId = null; 
     } else {
         // TRƯỜNG HỢP 2: LƯU RECORD MỚI 
-        const now = new Date();
+        const now = sessionStartTime || new Date();
         let finalDuration = (actualCompletedMinutes >= 2) ? actualCompletedMinutes : 2;
         
         const record = {

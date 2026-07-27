@@ -363,6 +363,19 @@
                     <div id="view-all-container" style="text-align: center; margin-top: 15px;"></div>
                 </div>
 
+                <!-- Khu vực dữ liệu (Luôn hiển thị ở cuối trang, canh giữa) -->
+                <div style="display: flex; justify-content: center; gap: 50px; padding: 24px 0 10px 0; border-top: 1px dashed #eae3d5; margin-top: 10px;">
+                    
+                    <button id="btn-import-csv" style="background: transparent; border: none; color: #888; font-size: 13px; font-weight: 600; cursor: pointer; transition: color 0.2s;">
+                        📂 Nhập file CSV
+                    </button>
+                    <!-- Input ẩn để chọn file -->
+                    <input type="file" id="file-import-csv" accept=".csv" style="display: none;">
+                    <button id="btn-export-csv" style="background: transparent; border: none; color: #888; font-size: 13px; font-weight: 600; cursor: pointer; transition: color 0.2s;">
+                        🔻 Xuất file CSV
+                    </button>
+                </div>
+
             </div>
         </section>
         
@@ -392,10 +405,6 @@
                 
                 <div id="all-history-list" style="overflow-y: auto; flex: 1; margin-bottom: 20px; padding-right: 5px; text-align: left; display: grid; gap: 12px; align-content: start;">
                     </div>
-
-                <div class="modal-actions">
-                    <button class="btn-save" id="btn-export-csv" style="width: 100%; background: #2c4a3e;">🔻 Kết xuất data ra file Excel (CSV)</button>
-                </div>
             </div>
         </div>
 

@@ -959,35 +959,153 @@ document.getElementById('btn-close-history-modal').addEventListener('click', () 
     document.body.classList.remove('no-scroll'); document.documentElement.classList.remove('no-scroll');
 });
 
-// THUẬT TOÁN EXPORT RA FILE CSV DÀNH CHO EXCEL
+// ==========================================
+// HỆ THỐNG XUẤT / NHẬP DỮ LIỆU BẰNG CSV
+// ==========================================
+
+// 1. XUẤT DỮ LIỆU (EXPORT CSV) - Đã được chuẩn hóa để an toàn khi Import
 document.getElementById('btn-export-csv').addEventListener('click', () => {
     const history = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
-    if (history.length === 0) return;
-
-    // Chuẩn bị nội dung CSV. 
-    // Dòng "\uFEFF" là ký tự BOM bắt buộc để Excel đọc được Tiếng Việt có dấu (UTF-8).
-    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-    csvContent += "Ngày Thực Tập,Thời Lượng (Phút),Ghi Nhận Lợi Ích\n"; // Header cột
-
-    history.forEach(session => {
-        const date = session.date;
-        const duration = session.duration;
-        const benefits = (session.benefits && session.benefits.length > 0) ? session.benefits.join(" | ") : "Chỉ tĩnh lặng";
+    if (history.length === 0) {
+        alert("Chưa có dữ liệu để xuất.");
+        return;
+    }
+    
+    // THÊM BOM (Byte Order Mark) để Excel mở tiếng Việt có dấu không bị lỗi font
+    let csvContent = "\uFEFF"; 
+    // Các cột 'ID' và 'ISO_Date' đóng vai trò như neo kỹ thuật để phục hồi chính xác
+    csvContent += "ID,ISO_Date,Ngày giờ hiển thị,Thời lượng (phút),Bài thiền,Thành quả\n";
+    
+    history.forEach(row => {
+        const id = row.id || "";
+        const isoDate = row.isoDate || "";
+        const display = `"${row.displayDate || ""}"`; // Bọc ngoặc kép để Excel không tự sửa format ngày
+        const duration = row.duration || 0;
+        const track = `"${row.trackTitle || ""}"`;
+        const benefits = `"${(row.benefits || []).join(' | ')}"`; // Các mảng nối với nhau bằng dấu gạch đứng
         
-        // Đặt nội dung vào cặp nháy kép " " để Excel không bị ngắt cột sai nếu có dấu phẩy trong văn bản
-        csvContent += `"${date}","${duration}","${benefits}"\n`;
+        csvContent += `${id},${isoDate},${display},${duration},${track},${benefits}\n`;
     });
-
-    // Tạo lệnh tải file ngầm
-    const encodedUri = encodeURI(csvContent);
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "Nhat_Ky_Thien_Dinh.csv");
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.href = URL.createObjectURL(blob);
+    link.download = `ThienDinh_Data_${dateStr}.csv`;
+    
     document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+// 2. KÍCH HOẠT HỘP THOẠI CHỌN FILE
+document.getElementById('btn-import-csv').addEventListener('click', () => {
+    document.getElementById('file-import-csv').click();
+});
+
+// 3. THUẬT TOÁN ĐỌC VÀ NHẬP DỮ LIỆU (IMPORT CSV)
+document.getElementById('file-import-csv').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        // Bỏ ký tự BOM nếu có ở đầu file
+        const cleanText = text.replace(/^\uFEFF/, '');
+        
+        // Tách file thành từng dòng
+        const lines = cleanText.split('\n').filter(line => line.trim() !== '');
+        if (lines.length <= 1) {
+            alert("❌ Lỗi: File CSV trống hoặc không có dữ liệu.");
+            return;
+        }
+
+        // BẢO MẬT: Kiểm tra Header xem có đúng chuẩn của app không (ngăn user nạp nhầm file CSV của app khác)
+        const header = lines[0].toLowerCase();
+        if (!header.includes("id") || !header.includes("iso_date")) {
+            alert("❌ Lỗi: Cấu trúc file CSV không hợp lệ hoặc bạn đã xóa mất các cột kỹ thuật (ID, ISO_Date).");
+            return;
+        }
+
+        let importedHistory = [];
+        let hasError = false;
+
+        // Quét từng dòng dữ liệu (bỏ qua dòng tiêu đề [0])
+        for (let i = 1; i < lines.length; i++) {
+            const row = lines[i];
+            
+            // THUẬT TOÁN ĐỌC CSV THÔNG MINH: Tách bằng dấu phẩy, nhưng BỎ QUA dấu phẩy nằm trong cặp ngoặc kép
+            const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+            const cols = row.split(regex).map(col => col.replace(/^"|"$/g, '').trim());
+
+            if (cols.length < 6) continue; // Bỏ qua nếu dòng rỗng hoặc thiếu dữ liệu
+
+            try {
+                // Tái tạo lại Object
+                const id = parseInt(cols[0], 10);
+                const duration = parseInt(cols[3], 10);
+                
+                let benefits = [];
+                if (cols[5]) {
+                    benefits = cols[5].split('|').map(b => b.trim()).filter(b => b !== "");
+                }
+
+                if (isNaN(id) || isNaN(duration)) {
+                    hasError = true;
+                    break;
+                }
+
+                importedHistory.push({
+                    id: id,
+                    isoDate: cols[1],
+                    displayDate: cols[2],
+                    duration: duration,
+                    trackTitle: cols[4],
+                    benefits: benefits
+                });
+            } catch (err) {
+                hasError = true;
+                break;
+            }
+        }
+
+        if (hasError) {
+            alert("❌ Lỗi: Dữ liệu bên trong file đã bị hỏng hoặc bạn đã nhập sai định dạng số. Vui lòng kiểm tra lại file Excel.");
+        } else if (importedHistory.length > 0) {
+            // THUẬT TOÁN HỢP NHẤT (MERGE) DỮ LIỆU
+            let currentHistory = JSON.parse(localStorage.getItem('zenPracticeHistory')) || [];
+            
+            // Tạo một danh sách các ID hiện có để dò tìm siêu tốc
+            const existingIds = new Set(currentHistory.map(record => record.id));
+            let newRecordsCount = 0;
+
+            // Kiểm tra từng bản ghi trong file CSV
+            importedHistory.forEach(newRecord => {
+                // Nếu ID này chưa từng tồn tại trên máy, thì mới thêm vào
+                if (!existingIds.has(newRecord.id)) {
+                    currentHistory.push(newRecord);
+                    newRecordsCount++;
+                }
+            });
+
+            if (newRecordsCount === 0) {
+                alert("✨ Không có dữ liệu mới nào được thêm. Toàn bộ lịch sử trong file CSV đã tồn tại trên máy của bạn.");
+            } else {
+                // Sắp xếp lại toàn bộ lịch sử theo đúng dòng thời gian (Từ cũ nhất đến mới nhất)
+                currentHistory.sort((a, b) => a.id - b.id);
+                
+                // Lưu ngược lại vào hệ thống
+                localStorage.setItem('zenPracticeHistory', JSON.stringify(currentHistory));
+                alert(`✨ Khôi phục thành công! Đã bổ sung ${newRecordsCount} bản ghi thiền tập mới. Ứng dụng sẽ tự động tải lại.`);
+                window.location.reload();
+            }
+        }
+        
+        event.target.value = ''; // Reset input để có thể nạp lại file nếu muốn
+    };
     
-    link.click(); // Kích hoạt tải về
-    
-    document.body.removeChild(link); // Dọn dẹp rác sau khi tải
+    reader.readAsText(file);
 });
 
 // Bắt sự kiện click vào nút "Chỉnh sửa" (Dùng Event Delegation vì thẻ HTML được sinh ra động)

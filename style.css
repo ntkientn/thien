@@ -1604,3 +1604,7 @@ html.no-scroll, body.no-scroll {
         padding: 16px 16px 0 16px !important;
     }
 }
+/* Hiệu ứng cho nút Export/Import ở Footer */
+#btn-export-csv:hover, #btn-import-csv:hover {
+    color: #2c4a3e !important;
+}
